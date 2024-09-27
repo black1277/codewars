@@ -1,0 +1,3383 @@
+<html lang="EN"><head>
+    <meta charset="utf-8">
+    <title>Codevars</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;600&amp;display=swap" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="style.css">
+	<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    color: #2b2b2b;
+    font-family: sans-serif;
+    background: #fcfcf2;
+    font-size: 16px;
+}
+p {
+    font-size: 18px;
+    font-family: 'Fira Sans', serif;
+    letter-spacing: 0.12em;
+    position: relative;
+    padding: 10px 10px 10px 25px;
+}
+pre {
+  padding: 5px 15px;
+  margin: 16px 0 8px;
+  background: #e4e4e4;
+  border: 3px inset grey;
+  font-family: "Fira Sans";
+}
+.content > div {
+  border: 1px solid grey;
+  margin: 12px 5px 2px;
+  padding: 10px 18px 0;
+  box-shadow: 4px 4px 10px;
+  background: #f2f2f2;
+  border-radius: 8px;
+}
+h6 {
+margin: 10px 0px 5px 0px;
+color: darkred;
+font-size: 1.4rem;
+text-shadow: 2px 2px 4px #555;
+}
+	</style>
+</head>
+<body>
+
+<div class="content"><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5a1e1089c9fc0ed14100001b">Tap Into Mr. Mxyzinjin's Safe</a></div><h6>JavaScript:</h6><div><pre>const { performance } = require('perf_hooks');
+function worker(low, dp, sml, login) {
+  let gc = e =&gt; e.toString(16),
+    reg = `(.{${sml}}[\\u${gc(low)}-\\u${gc(dp)}])|(\\D{4})`;
+  let start = _ =&gt; {
+    let dk = performance.now();
+    login(reg); return performance.now() - dk;
+  }
+  let mass = Array.from({ length: 4 }, start).sort();
+
+  return mass[1] + mass[2];
+}
+function cycle(login, dt) {
+  let lw = 0x4e00, up = 0x9fff, mid;
+  while (lw &lt; up) {
+    mid = (lw + up) &gt;&gt; 1;
+    let x = worker(lw, mid, dt, login),
+      y = worker(mid + 1, up, dt, login);
+    if (Math.abs(x - y) &lt;= 0.0017) return null;
+    x &lt; y ? up = mid : lw = mid + 1;
+  }
+  return String.fromCharCode(lw);
+}
+function crack(login) {
+  let i, t, rs = '';
+  for (i = 0; ; ++i) {
+    t = cycle(login, i);
+    if (!t) break;
+    rs += t;
+  }
+  return rs;
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/6411b91a5e71b915d237332d">Valid Parentheses</a></div><h6>JavaScript:</h6><div><pre>function validParentheses(ex) {
+	let m = ex
+	while (/\(\)/.test(m)){
+		m = m.replace(/\(\)/, '')
+}
+	return m.length === 0
+}</pre></div></div><div><div><div border="false"><div><span>2 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/527fde8d24b9309d9b000c4e">Break the pieces</a></div><h6>JavaScript:</h6><div><pre>function breakPieces(shape) {
+  let shapeArray = shape.split('\n').map(row =&gt; row.split('').map(char =&gt; char === ' ' ? 0 : char));
+  shapeArray.push([]);
+  shapeArray.unshift([]);
+
+  let pieceNumber = 1;
+  mapCells(shapeArray, (cell, rowIndex, colIndex) =&gt; {
+    if (!shapeArray[rowIndex][colIndex] &amp;&amp; markPiece(rowIndex, colIndex)) {
+      pieceNumber++;
+    }
+  });
+
+  let pieces = [];
+  while (--pieceNumber &gt; 0) {
+    pieces.push(extractPiece(pieceNumber));
+  }
+  return pieces;
+
+  function mapCells(array, fn) {
+    return array.map((row, i) =&gt; row.map((cell, j) =&gt; fn(cell, i, j)));
+  }
+
+  function markPiece(row, col) {
+    if (isOutOfBounds(row, col) || shapeArray[row][col] === '*') return false;
+    if (shapeArray[row][col]) return true;
+    shapeArray[row][col] = pieceNumber;
+    [[row - 1, col], [row, col + 1], [row + 1, col], [row, col - 1]].forEach(([r, c]) =&gt; {
+      if (!markPiece(r, c)) shapeArray[row][col] = '*';
+    });
+    return shapeArray[row][col] === pieceNumber;
+  }
+
+  function extractPiece(pieceNum) {
+    return formatPiece(fixPieceCorners(mapCells(shapeArray, (cell, row, col) =&gt; ('-|+'.includes(cell) &amp;&amp; isAdjacent(row, col)) ? cell : ' ')));
+
+    function isAdjacent(row, col) {
+      let count = 0;
+      [-1, 0, 1].forEach(dr =&gt; [-1, 0, 1].forEach(dc =&gt; count += Number(shapeArray[row + dr][col + dc] === pieceNum)));
+      return count &gt; 0;
+    }
+
+    function fixPieceCorners(shape) {
+      const replaceCorner = (row, col) =&gt; {
+        const vertical = shape[row - 1][col] === '|' || shape[row + 1][col] === '|';
+        const horizontal = shape[row][col - 1] === '-' || shape[row][col + 1] === '-';
+        return vertical &amp;&amp; horizontal ? '+' : vertical ? '|' : '-';
+      };
+      return mapCells(shape, (cell, row, col) =&gt; cell === '+' ? replaceCorner(row, col) : cell);
+    }
+
+    function formatPiece(shape) {
+      let leftMargin = Infinity;
+      return shape.map(row =&gt; row.join(''))
+        .filter(row =&gt; row.trim())
+        .map(row =&gt; {
+          row = row.trimRight();
+          leftMargin = Math.min(leftMargin, row.length - row.trim().length);
+          return row;
+        })
+        .map(row =&gt; row.substr(leftMargin))
+        .join('\n');
+    }
+  }
+
+  function isOutOfBounds(row, col) {
+    return row &lt; 0 || col &lt; 0 || row &gt;= shapeArray.length || col &gt;= shapeArray[row].length;
+  }
+}</pre></div></div><div><div><div border="false"><div><span>2 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/58a3fa665973c2a6e80000c4">Challenge Fun #10: Integer Square Root</a></div><h6>JavaScript:</h6><div><pre>function integerSquareRoot(input) {
+  const multiply = (num1, num2) =&gt; {
+    let product = num1.split('').map(digit =&gt; digit * num2);
+    for (let i = product.length - 1; i &gt; 0; i--) {
+      product[i - 1] += Math.floor(product[i] / 10);
+      product[i] %= 10;
+    }
+    product = product.join('').replace(/^0+/, '');
+    return product.length ? product : '0';
+  };
+  const lessThanOrEqual = (num1, num2) =&gt; {
+    num1 = num1.padStart(Math.max(num1.length, num2.length), '0');
+    num2 = num2.padStart(Math.max(num1.length, num2.length), '0');
+    if (num1 === num2) return true;
+    for (let i = 0; i &lt; num1.length; i++) {
+      if (num1[i] &lt; num2[i]) return true;
+      if (num1[i] &gt; num2[i]) return false;
+    }
+    return false;
+  };
+  const subtract = (num1, num2) =&gt; {
+    num1 = num1.padStart(Math.max(num1.length, num2.length), '0');
+    num2 = num2.padStart(Math.max(num1.length, num2.length), '0');
+    let difference = num1.split('').map((digit, index) =&gt; digit - num2[index]);
+    for (let i = difference.length - 1; i &gt; 0; i--) {
+      if (difference[i] &lt; 0) {
+        difference[i] += 10;
+        difference[i - 1]--;
+      }
+    }
+    difference = difference.join('').replace(/^0+/, '');
+    return difference.length ? difference : '0';
+  };
+
+  if (input.length % 2 !== 0) input = '0' + input;
+  let result = '0';
+  let dop = '0';
+
+  for (let i = 0; i &lt; input.length; i += 2) {
+    dop += input[i] + input[i + 1];
+    let multRes = multiply(result, '2');
+    let j = 0;
+    while (lessThanOrEqual(multiply(multRes + j, '' + j), dop) &amp;&amp; j &lt; 10) j++;
+    result += --j;
+    dop = subtract(dop, multiply(multRes + j, '' + j));
+  }
+
+  result = result.replace(/^0+/, '');
+  return result.length ? result : '0';
+}</pre></div></div><div><div><div border="false"><div><span>2 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5a331ea7ee1aae8f24000175">Insane Coloured Triangles</a></div><h6>JavaScript:</h6><div><pre>const combinations = {
+  'RR': 'R',
+  'GG': 'G',
+  'BB': 'B',
+  'RG': 'B',
+  'GR': 'B',
+  'RB': 'G',
+  'BR': 'G',
+  'GB': 'R',
+  'BG': 'R'
+};
+
+const expReduce = x =&gt; Math.log(x) / Math.log(3);
+
+function triangle(row) {
+  const strlen = row.length;
+
+  if (strlen === 1) return row[0];
+
+  const n = Math.floor(expReduce(strlen - 1));
+  const needLen = Math.pow(3, n) + 1;
+
+  if (strlen === needLen) return combinations[row[0] + row[strlen - 1]];
+
+  const size = strlen - needLen + 1;
+  const firstColor = triangle(row.substring(0, size));
+  const secondColor = triangle(row.substring(strlen - size));
+
+  return combinations[firstColor + secondColor];
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/515de9ae9dcfc28eb6000001">Split Strings</a></div><h6>JavaScript:</h6><div><pre>function solution(vdb) {
+    if (vdb.length % 2 !== 0) vdb += '_';
+    return vdb.match(/.{1,2}/g)|| [];
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5241060ff2471a5d7600025a">Custom Setters and Getters</a></div><h6>JavaScript:</h6><div><pre>function Archiver() {
+    let temperature = null;
+    let archive = [];
+    Object.defineProperty(this, 'temperature', {
+      get: ()=&gt; temperature,
+      set: (val)=&gt; {
+        temperature = val;
+        archive.push({ date: new Date(), val: temperature });
+      }
+    });
+    this.getArchive = ()=&gt;archive;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52605419be184942d400003d">Default Arguments</a></div><h6>JavaScript:</h6><div><pre>function defaultArguments(func, params) {
+  let args = func.toString()
+    .replace(/\/\*.*?\*\//g, '')
+    .replace(/\/\/.*/gm, '')
+    .replace(/\s+/g, '').match(/\(.*?\)/).join('')
+    .replace(/[\(\)]/gi, '').split(',');
+  function patchedFN(...el) {
+    el = el.map(a =&gt; { return a == undefined ? 'undefined' : a });
+    for (i in params) {
+      if (args.indexOf(i) != -1 &amp;&amp; (el[args.indexOf(i)] == undefined))
+        el[args.indexOf(i)] = params[i]
+    }
+    el = el.map(x =&gt; { return x == 'undefined' ? undefined : x })
+    patchedFN.toString = function () {
+      return func.toString()
+    }
+    return el.length != args.length ? NaN : func(...el)
+  };
+  return patchedFN;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/514b6c44a337752e67000077">Name Your Space</a></div><h6>JavaScript:</h6><div><pre>function namespace(root, path, value){
+  let arrSplittedPath = path.split`.`
+  let nameProp = arrSplittedPath.pop()
+  let base = root
+  arrSplittedPath.map((part) =&gt; {
+    base[part] = base[part] || {}
+    base = base[part]
+  })
+  if (arguments.length &gt; 2) base[nameProp] = value
+  else return base[nameProp]
+}</pre></div></div><div><div><div border="false"><div><span>1 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/545434090294935e7d0010ab">Functional SQL</a></div><h6>JavaScript:</h6><div><pre>let query = function () {
+  const chain = {};
+  const whereExp = [];
+  const havingExp = [];
+  const tunel = row =&gt; row;
+  let source = [];
+  let selector = null;
+  let order = [];
+  let group = [];
+
+  chain.select = function (s) {
+    if (selector != null) throw new Error('Duplicate SELECT');
+    selector = s || false;
+    return chain;
+  };
+
+  chain.from = function () {
+    if (source.length &gt; 0) throw new Error('Duplicate FROM');
+    source = Array.from(arguments);
+    return chain;
+  };
+
+  chain.where = function () {
+    whereExp.push(Array.from(arguments));
+    return chain;
+  };
+
+  chain.having = function () {
+    havingExp.push(Array.from(arguments));
+    return chain;
+  };
+
+  chain.groupBy = function () {
+    if (group.length &gt; 0) throw new Error('Duplicate GROUPBY');
+    group = Array.from(arguments);
+    return chain;
+  };
+
+  chain.orderBy = function () {
+    if (order.length &gt; 0) throw new Error('Duplicate ORDERBY');
+    order = Array.from(arguments);
+    return chain;
+  };
+
+  chain.execute = function () {
+    const midle = [];
+    const datGroup = [];
+
+    let data = [];
+    let cnt = 0;
+
+    if (source.length &gt; 1) {
+
+      source.forEach(() =&gt; data.push([]));
+
+      source.forEach((el,i) =&gt; {
+        data[i] = el.slice(0)
+      });
+
+      function tableRecurs(rec, ar) {
+        if (rec.length === 0) {
+          midle.push(ar.slice(0));
+        } else {
+          for (let i = 0; i &lt; rec[0].length; i++) {
+            ar.push(rec[0][i]);
+            tableRecurs(rec.slice(1), ar);
+            ar.splice(-1, 1);
+          }
+        }
+      }
+
+      tableRecurs(data, []);
+
+      data = [];
+      midle.forEach(row =&gt; {
+        if (whereExp.every(wher =&gt; wher.some(expWher =&gt; expWher(row)))) {
+          data.push(row);
+        }
+      });
+
+    } else if (source.length === 1) {
+
+      source[0].forEach(row =&gt; {
+        if (whereExp.every(wher =&gt; wher.some(expWher =&gt; expWher(row)))) {
+          data.push(row);
+        }
+      });
+
+    } else data = [];
+
+    if (group.length &gt; 0) {
+      const dtMap = new Map();
+      const sym = Symbol('system');
+
+      data.forEach(row =&gt; {
+        let mp = dtMap;
+
+        group.forEach(backGroup =&gt; {
+          let gr = backGroup(row);
+          mp.set(gr, mp.get(gr) || new Map());
+          mp = mp.get(gr);
+        });
+
+        mp.set(sym, mp.get(sym) || []);
+        let arr = mp.get(sym);
+        arr.push(row);
+        mp.set(sym, arr);
+      });
+
+      function recurse(recMap, grp) {
+        if (recMap.get(sym) !== undefined) {
+          recMap.get(sym).forEach(e =&gt; grp.push(e));
+        } else {
+          for (let [k, v] of recMap) {
+            k = /\d+/.test(k) ? Number(k) : k;
+            let row = [k, []];
+            recurse(v, row[1]);
+            grp.push(row);
+          }
+        }
+      }
+
+      recurse(dtMap, datGroup);
+
+      datGroup.forEach(lnUp =&gt; { if (havingExp.every(hav =&gt; hav.some(expHav =&gt; expHav(lnUp)))) midle.push(lnUp) });
+      data = midle;
+    }
+
+    data = data.map(selector || tunel);
+    order.forEach(backOrder =&gt; data = data.sort(backOrder));
+
+    return data
+  };
+
+  return chain;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/520446778469526ec0000001">Nesting Structure Comparison</a></div><h6>JavaScript:</h6><div><pre>Array.prototype.sameStructureAs = function (arr) {
+  if (this.length !== arr.length) return false
+  for (let i = 0; i &lt; this.length; ++i)
+    if ((Array.isArray(this[i]) &amp;&amp; !this[i].sameStructureAs(arr[i])) ||
+       (!Array.isArray(this[i]) &amp;&amp; Array.isArray(arr[i]))) return false
+  return true
+}
+</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52742f58faf5485cae000b9a">Human readable duration format</a></div><h6>JavaScript:</h6><div><pre>function formatDuration(sec) {
+  if (sec === 0) return "now";
+
+  const obj = [
+    { label: 'year', duration: 365 * 24 * 60 * 60 },
+    { label: 'day', duration: 24 * 60 * 60 },
+    { label: 'hour', duration: 60 * 60 },
+    { label: 'minute', duration: 60 },
+    { label: 'second', duration: 1 }
+  ];
+
+  let result = [];
+
+  for (let i = 0; i &lt; obj.length; i++) {
+    const period = obj[i];
+    const val = Math.floor(sec / period.duration);
+
+    if (val &gt; 0) {
+      result.push(val + ' ' + period.label + (val === 1 ? '' : 's'));
+      sec %= period.duration;
+    }
+  }
+
+  return result.length &gt; 1 ? result.slice(0, -1).join(', ') + ' and ' + result[result.length - 1] : result[0];
+}
+</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52f831fa9d332c6591000511">Molecule to atoms</a></div><h6>JavaScript:</h6><div><pre>function parseMolecule(rec) {
+  const El = '[A-Z][a-z]?';
+  const fr1 = new RegExp(`(${El})(\\d*)`, 'g');
+  const fr2 = new RegExp(`${El}`, 'g');
+  const reg = [
+    new RegExp(/(\([^)]+\))(\d*)/, 'g'),
+    new RegExp(/(\[[^)]+\])(\d*)/, 'g'),
+    new RegExp(/(\{[^)]+\})(\d*)/, 'g')
+  ]
+  result = rec.replace(fr1, (e, st, nm) =&gt; st.repeat(nm || 1))
+  const srep = (e, st, nm) =&gt; st.slice(1, -1).repeat(nm || 1)
+  reg.forEach(exp =&gt; result = result.replace(exp, srep))
+  return (result.match(fr2) || []).reduce((obj, element) =&gt; (obj[element] = obj[element] + 1 || 1, obj), {})
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55c6126177c9441a570000cc">Weight for weight</a></div><h6>JavaScript:</h6><div><pre>function orderWeight(str) {
+    const sumD = num =&gt; num.split('').reduce((acc, digit) =&gt; acc + parseInt(digit), 0);
+
+    const stWeights = str.split(' ')
+        .sort((numb1, numb2) =&gt; {
+            const weightDiff = sumD(numb1) - sumD(numb2);
+            return weightDiff !== 0 ? weightDiff : numb1.localeCompare(numb2);
+        })
+        .join(' ');
+
+    return stWeights;
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/56baeae7022c16dd7400086e">Phone Directory</a></div><h6>JavaScript:</h6><div><pre>function phone(phoneBook, num) {
+  const lines = phoneBook.split('\n');
+  const phoneRegex = /(\+\d{1,2}-\d{3}-\d{3}-\d{4})/g;
+  const nameRegex = /&lt;([^&gt;]*.)&gt;/g;
+  const contacts = {};
+
+  lines.forEach(line =&gt; {
+    if(line.length &gt; 15){
+
+    let phone = '';
+    let newStr = line.replace(phoneRegex, (match) =&gt; {
+      phone = match;
+      return '';
+    })
+    let name = '';
+    let adress = newStr.replace(nameRegex, (match) =&gt; {
+      name = match;
+      return '';
+    })
+    phone = phone.slice(1)
+    name = name.slice(1, -1)
+    adress = adress.replace(/[\/\\\$:;,!\?\*]/g, '').replace(/[_]/,' ').replace(/  +/g, ' ').trim()
+
+    if(contacts[phone]) contacts[phone] = "Error =&gt; Too many people: "+phone
+      else contacts[phone] = `Phone =&gt; ${phone}, Name =&gt; ${name}, Address =&gt; ${adress}`
+
+    }
+  });
+
+  if (contacts[num]) return contacts[num]
+  else return "Error =&gt; Not found: "+num
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/58dea43ff98a7e2124000169">Divide integers as strings</a></div><h6>JavaScript:</h6><div><pre>  function isGreaterOrEqualString(num1, num2) {
+    return num1.length === num2.length ? num1 &gt;= num2 : num1.length &gt; num2.length;
+}
+
+function subtractStrings(num1, num2) {
+    let flag = 0;
+    let digit1, digit2, difference, result = '';
+
+    for (let i = 0; i &lt; num1.length; i++) {
+        digit1 = +num1[num1.length - i - 1];
+        digit2 = +num2[num2.length - i - 1] || 0;
+        difference = digit1 - digit2 - flag;
+
+        if (difference &lt; 0) { difference += 10; flag = 1;}
+          else flag = 0;
+
+
+        result = String(difference) + result;
+    }
+
+    while (result[0] === '0' &amp;&amp; result.length &gt; 1)
+        result = result.slice(1);
+
+
+    return result;
+}
+
+function divideStrings(dividend, divisor) {
+    let quotient = '0', remainder = '0';
+
+    for (let i = 0; i &lt; dividend.length; i++) {
+        remainder = remainder === '0' ? dividend[i] : remainder + dividend[i];
+
+        let count = 0;
+        while (isGreaterOrEqualString(remainder, divisor)) {
+            remainder = subtractStrings(remainder, divisor);
+            count++;
+        }
+
+        quotient = quotient === '0' ? String(count) : quotient + String(count);
+    }
+
+    return [quotient, remainder];
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5270d0d18625160ada0000e4">Greed is Good</a></div><h6>TypeScript:</h6><div><pre>export function score(dice: number[]): number {
+    let score = 0
+    const count: {[key: number]: number} = {}
+
+    for (const value of dice) {
+        if (count[value]) count[value]++
+         else count[value] = 1
+    }
+
+    for (const [value, freq] of Object.entries(count)) {
+        const val = parseInt(value)
+
+        if (freq &gt;= 3) {
+            if (val === 1) score += 1000 + 100 * (freq - 3)
+             else score += val * 100
+
+            if (val === 5) score +=  (freq - 3) * 50
+
+        } else {
+            if (val === 1) score += 100 * freq
+             else if (val === 5) score += 50 * freq
+        }
+    }
+
+    return score
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/53b7bc844db8fde50800020a">Points On A Line</a></div><h6>Python:</h6><div><pre>def on_line(points):
+    unique_points = set(points)
+
+    if len(unique_points) &lt; 2:
+        return True
+
+    unique_x = set(x for x, y in unique_points)
+    if len(unique_x) == 1:
+        return True
+
+    x1, y1 = list(unique_points)[0]
+    x2, y2 = list(unique_points)[1]
+    if x2 - x1 == 0:
+        slope = None
+    else:
+        slope = (y2 - y1) / (x2 - x1)
+
+    for x, y in unique_points:
+        if slope is None:
+            if x != x1:
+                return False
+        elif y != y1 + slope * (x - x1):
+            return False
+
+    return True</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55bf01e5a717a0d57e0000ec">Persistent Bugger.</a></div><h6>Python:</h6><div><pre>def persistence(num):
+    count = 0
+    while num &gt;= 10:
+        product = 1
+        for digit in str(num):
+            product *= int(digit)
+        num = product
+        count += 1
+    return count</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/546f922b54af40e1e90001da">Replace With Alphabet Position</a></div><h6>Python:</h6><div><pre>def alphabet_position(text):
+    result = []
+    for char in text.lower():
+        if char.isalpha():
+            result.append(str(ord(char) - ord('a') + 1))
+
+    return ' '.join(result)</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54bf1c2cd5b56cc47f0007a1">Counting Duplicates</a></div><h6>Python:</h6><div><pre>def duplicate_count(input_string):
+    char_count = {}
+    duplicates = 0
+
+    input_string = input_string.lower()
+
+    for char in input_string:
+        if char.isalnum():
+            if char in char_count:
+                char_count[char] += 1
+                if char_count[char] == 2:
+                    duplicates += 1
+            else:
+                char_count[char] = 1
+
+    return duplicates
+     </pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5526fc09a1bbd946250002dc">Find The Parity Outlier</a></div><h6>Python:</h6><div><pre>def find_outlier(integers):
+    odds = [num for num in integers if num % 2 != 0]
+    evens = [num for num in integers if num % 2 == 0]
+
+    return odds[0] if len(odds) == 1 else evens[0]</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/526571aae218b8ee490006f4">Bit Counting</a></div><h6>Python:</h6><div><pre>def count_bits(n):
+    return bin(n).count('1')</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/525f50e3b73515a6db000b83">Create Phone Number</a></div><h6>Python:</h6><div><pre>def create_phone_number(n):
+    phone_number = "({}{}{}) {}{}{}-{}{}{}{}".format(*n)
+    return phone_number</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/541c8630095125aba6000c00">Sum of Digits / Digital Root</a></div><h6>Python:</h6><div><pre>def digital_root(n):
+    while n &gt; 9:
+        n = sum(int(digit) for digit in str(n))
+    return n</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/546e2562b03326a88e000020">Square Every Digit</a></div><h6>Python:</h6><div><pre>def square_digits(nm):
+    digits = [int(d)**2 for d in str(nm)]
+
+    result = int(''.join(map(str, digits)))
+
+    return result</pre></div></div><div><div><div border="false"><div><span>8 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/53da3dbb4a5168369a0000fe">Even or Odd</a></div><h6>Python:</h6><div><pre>def even_or_odd(number):
+    if number % 2 == 0:
+        return "Even"
+    else:
+        return "Odd"</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/514b92a657cdc65150000006">Multiples of 3 or 5</a></div><h6>TypeScript:</h6><div><pre>export class Challenge {
+    static solution(rim: number): number {
+        if (rim &lt; 0) return 0
+
+        let cnt = 0
+        for (let i = 3; i &lt; rim; i++) {
+            if (i % 3 === 0 || i % 5 === 0) cnt += i
+        }
+
+        return cnt
+    }
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/58291fea7ff3f640980000f9">Coding Meetup #8 - Higher-Order Functions Series - Will all continents be represented?</a></div><h6>JavaScript:</h6><div><pre>function allContinents(developers) {
+    const requiredZones = new Set(['Africa', 'Americas', 'Asia', 'Europe', 'Oceania'])
+    const foundZones = new Set()
+
+    for (let developer of developers) {
+        if (requiredZones.has(developer.continent)) foundZones.add(developer.continent)
+    }
+
+    for (let zone of requiredZones) {
+        if (!foundZones.has(zone)) return false
+    }
+
+    return true
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/582887f7d04efdaae3000090">Coding Meetup #7 - Higher-Order Functions Series - Find the most senior developer</a></div><h6>JavaScript:</h6><div><pre>const findSenior = list =&gt; {
+  const ageMax = list.reduce((maxVal, devp) =&gt; Math.max(maxVal, devp.age), 0)
+  return list.filter(devp =&gt; devp.age === ageMax)
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/582746fa14b3892727000c4f">Coding Meetup #1 - Higher-Order Functions Series - Count the number of JavaScript developers coming from Europe</a></div><h6>JavaScript:</h6><div><pre>const countDevelopers = list =&gt; list.filter(dev =&gt; dev.language === 'JavaScript' &amp;&amp; dev.continent === 'Europe').length;</pre></div></div><div><div><div border="false"><div><span>2 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5970f479e75b6c00ce000043">How can I throw an error here?</a></div><h6>JavaScript:</h6><div><pre>function bang() {
+  try {
+    let c;
+    c.a = c.b;
+  } catch (e) {
+    let th = ['th', 'row'].join``;
+    e.message = ['Just ', th, ' like this!'].join``;
+
+    (function* () { })()[th](e)
+  }
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5765870e190b1472ec0022a2">Path Finder #1: can you reach the exit?</a></div><h6>JavaScript:</h6><div><pre>function pathFinder(kl){
+  if (kl.length === 1) return true
+  let mx =  kl.split('\n').map(r=&gt;r.split``),
+      m = mx.length-1,
+      obArr = [{x:0,y:0,all:0}];
+  while(obArr.length){
+    const {x,y,all} = obArr.shift();
+    const tryArr = [
+      [x+1,y],
+      [x,y+1],
+      [x-1,y],
+      [x,y-1]
+    ];
+    if(x==m &amp;&amp; y==m) return true;
+    mx[x][y]='W';
+    tryArr.forEach(([a,b])=&gt;{
+      if(mx[a] &amp;&amp; mx[a][b] &amp;&amp; mx[a][b] !== 'W'){
+        obArr.push({x:a,y:b,all:all+1});
+        mx[a][b] = 'W';
+      }
+    })
+  }
+  return false;
+}</pre></div><div><pre>function pathFinder(maze){
+  if (maze.length === 1) return true
+  let mx =  maze.split('\n').map(r=&gt;r.split``)
+  let obArr = [{x:0,y:0,all:0}];
+  let m = mx.length-1;
+  while(obArr.length){
+    const {x,y,all} = obArr.shift();
+    if(x==m &amp;&amp; y==m) return true;
+    mx[x][y]='W';
+    [[x+1,y],[x-1,y],[x,y+1],[x,y-1]].forEach(([a,b])=&gt;{
+      if(mx[a] &amp;&amp; mx[a][b] &amp;&amp; mx[a][b] != 'W'){
+        obArr.push({x:a,y:b,all:all+1});
+        mx[a][b] = 'W';
+      }
+    })
+  }
+  return false;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55b7bb74a0256d4467000070">Number of Proper Fractions with Denominator d</a></div><h6>JavaScript:</h6><div><pre>function properFractions(num) {
+	if (num === 1) return 0
+	let res = num, q = num
+	for (let j = 2; j &lt;= Math.sqrt(q); j++) {
+		if (q % j === 0) {
+			res = res / j * (j - 1)
+			while (q % j === 0) q /= j
+		}
+	}
+	if (q &gt; 1) res = (q - 1) * res / q
+	return res
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/583d6cf7c23341eee900025b">The maximum sum value of ranges -- Ultimate version</a></div><h6>JavaScript:</h6><div><pre>//Fenwick Tree
+function treeUpd(i, v, n, tree) {
+	while (i &lt; n) {
+		tree[i] += v
+		i |= i + 1
+	}
+}
+function toSum(m, tree) {
+	let sumTree = 0
+	while (m &gt;= 0) {
+		sumTree += tree[m]
+		m &amp;= m + 1
+		m--
+	}
+	return sumTree
+}
+function maxSum(inpArr, rng) {
+	const tree = inpArr.slice(0)
+	const len = inpArr.length
+	for (let i = 0; i &lt; len; i++) {
+		let q = i | (i + 1)
+		if (q &lt; len) tree[q] += tree[i]
+	}
+	let thisMax = Number.NEGATIVE_INFINITY
+	for (let [start, end, num] of rng) {
+		let sub = num - inpArr[start]
+		treeUpd(start, sub, len, tree)
+		inpArr[start] = num
+		const delta = toSum(end, tree) - toSum(start - 1, tree)
+		if (delta &gt; thisMax) thisMax = delta
+	}
+	return thisMax
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/525c7c5ab6aecef16e0001a5">parseInt() reloaded</a></div><h6>JavaScript:</h6><div><pre>const toNum = {
+    zero: 0,
+    one: 1,
+    two: 2,
+    three: 3,
+    four: 4,
+    five: 5,
+    six: 6,
+    seven: 7,
+    eight: 8,
+    nine: 9,
+    ten: 10,
+    eleven: 11,
+    twelve: 12,
+    thirteen: 13,
+    fourteen: 14,
+    fifteen: 15,
+    sixteen: 16,
+    seventeen: 17,
+    eighteen: 18,
+    nineteen: 19,
+    twenty: 20,
+    thirty: 30,
+    forty: 40,
+    fifty: 50,
+    sixty: 60,
+    seventy: 70,
+    eighty: 80,
+    ninety: 90
+};
+const toBig = {
+  hundred: 100,
+  thousand: 1000,
+  million: 1000000
+};
+function parseInt(sym) {
+  let splited = sym.split(/ |-/)
+  let rd = splited.reduce((ac, el)=&gt; {
+    if (toNum[el]) ac += toNum[el]
+    if (toBig[el]) ac += toBig[el] * (ac % toBig[el]) - (ac % toBig[el])
+        return ac
+    },0)
+  return rd
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/56c04261c3fcf33f2d000534">Magnet particules in boxes</a></div><h6>TypeScript:</h6><div><pre>export function doubles(one:number, sec:number):number {
+	let count = 1, flot = 0.0
+	while (count &lt;= sec) {
+		let os = count + 1.0,
+		prom = 1.0,
+		mes = 1
+		while (mes &lt;= one) {
+			prom = prom * os * os
+			if (prom &gt; 1e16) break
+			flot += 1 / (prom * mes)
+			mes++
+		}
+		count++
+	}
+	return flot
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/574d0b01b4b769b207000ca3">Priori Incantatem</a></div><h6>JavaScript:</h6><div><pre>class Wand {
+	constructor(zaklinaniya = {}) {
+		this.vizov = [];
+
+		Object.assign(this, zaklinaniya);
+		const proxy = new Proxy(this, {
+			get: (tg, pr) =&gt; {
+				const val = tg[pr];
+				if (typeof val === 'function') {
+					return () =&gt; {
+						tg.vizov.unshift(pr);
+						const rs = tg[pr].call(proxy);
+						if (tg.vizov.length &gt; MAX_PRIOR_SPELLS) tg.vizov.pop();
+						return rs;
+					}
+				}
+				return tg[pr];
+			},
+		});
+		return proxy
+	}
+	prioriIncantatem() {
+		return this.vizov.slice(1);
+	}
+	deletrius() {
+		this.vizov = ['deletrius'];
+	}
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/56fa9cd6da8ca623f9001233">Elemental Words</a></div><h6>Python:</h6><div><pre>ELEMENTS={'H': 'Hydrogen', 'He': 'Helium', 'Li': 'Lithium', 'Be': 'Beryllium', 'B': 'Boron', 'C': 'Carbon', 'N': 'Nitrogen', 'O': 'Oxygen', 'F': 'Fluorine', 'Ne': 'Neon', 'Na': 'Sodium', 'Mg': 'Magnesium', 'Al': 'Aluminium', 'Si': 'Silicon', 'P': 'Phosphorus', 'S': 'Sulfur', 'Cl': 'Chlorine', 'Ar': 'Argon', 'K': 'Potassium', 'Ca': 'Calcium', 'Sc': 'Scandium', 'Ti': 'Titanium', 'V': 'Vanadium', 'Cr': 'Chromium', 'Mn': 'Manganese', 'Fe': 'Iron', 'Co': 'Cobalt', 'Ni': 'Nickel', 'Cu': 'Copper', 'Zn': 'Zinc', 'Ga': 'Gallium', 'Ge': 'Germanium', 'As': 'Arsenic', 'Se': 'Selenium', 'Br': 'Bromine', 'Kr': 'Krypton', 'Rb': 'Rubidium', 'Sr': 'Strontium', 'Y': 'Yttrium', 'Zr': 'Zirconium', 'Nb': 'Niobium', 'Mo': 'Molybdenum', 'Tc': 'Technetium', 'Ru': 'Ruthenium', 'Rh': 'Rhodium', 'Pd': 'Palladium', 'Ag': 'Silver', 'Cd': 'Cadmium', 'In': 'Indium', 'Sn': 'Tin', 'Sb': 'Antimony', 'Te': 'Tellurium', 'I': 'Iodine', 'Xe': 'Xenon', 'Cs': 'Caesium', 'Ba': 'Barium', 'La': 'Lanthanum', 'Ce': 'Cerium', 'Pr': 'Praseodymium', 'Nd': 'Neodymium', 'Pm': 'Promethium', 'Sm': 'Samarium', 'Eu': 'Europium', 'Gd': 'Gadolinium', 'Tb': 'Terbium', 'Dy': 'Dysprosium', 'Ho': 'Holmium', 'Er': 'Erbium', 'Tm': 'Thulium', 'Yb': 'Ytterbium', 'Lu': 'Lutetium', 'Hf': 'Hafnium', 'Ta': 'Tantalum', 'W': 'Tungsten', 'Re': 'Rhenium', 'Os': 'Osmium', 'Ir': 'Iridium', 'Pt': 'Platinum', 'Au': 'Gold', 'Hg': 'Mercury', 'Tl': 'Thallium', 'Pb': 'Lead', 'Bi': 'Bismuth', 'Po': 'Polonium', 'At': 'Astatine', 'Rn': 'Radon', 'Fr': 'Francium', 'Ra': 'Radium', 'Ac': 'Actinium', 'Th': 'Thorium', 'Pa': 'Protactinium', 'U': 'Uranium', 'Np': 'Neptunium', 'Pu': 'Plutonium', 'Am': 'Americium', 'Cm': 'Curium', 'Bk': 'Berkelium', 'Cf': 'Californium', 'Es': 'Einsteinium', 'Fm': 'Fermium', 'Md': 'Mendelevium', 'No': 'Nobelium', 'Lr': 'Lawrencium', 'Rf': 'Rutherfordium', 'Db': 'Dubnium', 'Sg': 'Seaborgium', 'Bh': 'Bohrium', 'Hs': 'Hassium', 'Mt': 'Meitnerium', 'Ds': 'Darmstadtium', 'Rg': 'Roentgenium', 'Cn': 'Copernicium', 'Uut': 'Ununtrium', 'Fl': 'Flerovium', 'Uup': 'Ununpentium', 'Lv': 'Livermorium', 'Uus': 'Ununseptium', 'Uuo': 'Ununoctium'}
+
+def elemental_forms(inp):
+    result=recurse(inp, [], set())
+    return [list(i) for i in result]
+
+def recurse(txt, pr, sc):
+    if not txt:
+        sc.add(tuple(pr))
+        return
+    for i in range(3):
+        elm=txt[:i+1].capitalize()
+        if elm in ELEMENTS:
+            recurse(txt[i+1:], pr+[f"{ELEMENTS[elm]} ({elm})"], sc)
+    return sc</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/595ddfe2fc339d8a7d000089">Hamster me</a></div><h6>Python:</h6><div><pre>def hamster_me(inp, mes):
+    all=0
+    symDCT={}
+    cash=sorted(set(inp))
+    for j in range(len(cash)-1):
+        sch=1
+        symDCT[cash[j]]=cash[j]+str(sch)
+        while chr(ord(cash[j])+sch)&lt;chr(ord(cash[j+1])):
+            symDCT[chr(ord(cash[j])+sch)]=cash[j]+str(sch+1)
+            sch+=1
+        all+=sch
+    for j in range(26-all):
+        symDCT[chr(ord('a')+(ord(cash[-1])-ord('a')+j)%26)]=cash[-1]+str(j+1)
+    res=''.join(symDCT[i] for i in mes)
+    return res</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/525fbff0594da0665c0003a3">Conway's Game of Life</a></div><h6>Python:</h6><div><pre>from copy import deepcopy
+
+def next_gen(matrix):
+    lst=deepcopy(matrix)
+    dimY=len(matrix)
+    for i in range(0,dimY):
+        dimX=len(matrix[i])
+        for j in range(0,dimX):
+            tp=0
+            cnt=0
+            for x in range(i-1, i+2):
+                for y in range(j-1, j+2):
+                    if x&lt;0 or y&lt;0 or x&gt;=len(matrix) or y&gt;=len(matrix[i]) or (x==i and y==j):
+                        continue
+                    if lst[x][y]==1:
+                        cnt+=1
+                    tp+=1
+            if lst[i][j]==1 and (cnt&lt;2 or cnt&gt;3):
+                matrix[i][j]=0
+            elif lst[i][j]==0 and cnt==3:
+                matrix[i][j]=1
+    return matrix</pre></div></div><div><div><div border="false"><div><span>2 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59ee2671233243fd2c000168">Multi Line Task:  Hello World (Without Letters)</a></div><h6>JavaScript:</h6><div><pre>$
+=
+(
+_
+=
+[
+]
+,
+_
+[
+0
+]
+=
+(
+[
+]
++
+{
+}
+)
++
+[
+]
++
+!
+[
+]
++
+[
+]
+[
+[
+]
+]
+,
+_
+[
+1
+]
+=
+(
+!
+!
+[
+]
++
+[
+]
+)
+[
+1
+]
+,
+_
+[
+2
+]
+=
+_
+[
+0
+]
+[
+5
+]
++
+_
+[
+0
+]
+[
+1
+]
++
+_
+[
+0
+]
+[
+3
+*
+7
+]
++
+_
+[
+0
+]
+[
+9
++
+9
+]
++
+_
+[
+0
+]
+[
+6
+]
++
+_
+[
+1
+]
++
+_
+[
+0
+]
+[
+4
+*
+5
+]
++
+_
+[
+0
+]
+[
+5
+]
++
+_
+[
+0
+]
+[
+6
+]
++
+_
+[
+0
+]
+[
+1
+]
++
+_
+[
+1
+]
+,
+_
+[
+3
+]
+=
+_
+[
+0
+]
+[
+6
+]
++
+_
+[
+0
+]
+[
+1
+]
++
+$
+[
+1
+]
++
+_
+[
+0
+]
+[
+6
+]
++
+_
+[
+1
+]
++
+_
+[
+0
+]
+[
+5
+*
+5
+]
++
+_
+[
+0
+]
+[
+3
+*
+7
+]
++
+$
+[
+2
+]
+,
+_
+[
+4
+]
+=
+_
+[
+0
+]
+[
+3
+*
+5
+]
++
+_
+[
+1
+]
++
+_
+[
+0
+]
+[
+1
+]
++
+(
+3
+*
+7
++
+1
+)
+[
+_
+[
+3
+]
+]
+(
+4
+*
+9
+)
++
+$
+[
+0
+]
++
+(
+2
+*
+8
++
+1
+)
+[
+_
+[
+3
+]
+]
+(
+4
+*
+9
+)
++
+_
+[
+0
+]
+[
+9
++
+7
+]
++
+_
+[
+1
+]
++
+$
+[
+0
+]
++
+_
+[
+0
+]
+[
+1
+]
++
+_
+[
+0
+]
+[
+3
+*
+7
++
+1
+]
++
+_
+[
+0
+]
+[
+4
+]
+,
+_
+[
+5
+]
+=
+`
+`
+[
+_
+[
+2
+]
+]
+[
+_
+[
+4
+]
+]
+,
+_
+[
+6
+]
+=
+_
+[
+5
+]
+(
+4
+*
+9
+*
+2
+)
++
+_
+[
+0
+]
+[
+4
+]
++
+_
+[
+0
+]
+[
+2
+*
+8
++
+1
+]
++
+_
+[
+0
+]
+[
+2
+*
+8
++
+1
+]
++
+_
+[
+0
+]
+[
+1
+]
++
+_
+[
+5
+]
+(
+4
+*
+9
++
+8
+)
++
+_
+[
+0
+]
+[
+7
+]
++
+_
+[
+5
+]
+(
+9
+*
+9
++
+6
+*
+6
++
+2
+)
++
+_
+[
+0
+]
+[
+1
+]
++
+_
+[
+1
+]
++
+_
+[
+0
+]
+[
+2
+*
+8
++
+1
+]
++
+_
+[
+0
+]
+[
+9
++
+9
++
+4
+]
++
+_
+[
+5
+]
+(
+3
+*
+9
++
+6
+)
+,
+`
+`
+[
+_
+[
+0
+]
+[
+2
+*
+9
+]
++
+_
+[
+0
+]
+[
+2
+*
+8
++
+1
+]
++
+_
+[
+0
+]
+[
+5
+*
+5
+]
++
+_
+[
+0
+]
+[
+5
+]
++
+_
+[
+0
+]
+[
+4
+]
+]
+[
+(
+9
++
+2
+)
+[
+_
+[
+3
+]
+]
+(
+4
+*
+9
+)
++
+_
+[
+0
+]
+[
+5
+*
+5
+]
++
+_
+[
+0
+]
+[
+3
+*
+7
+]
++
+_
+[
+0
+]
+[
+3
+*
+7
++
+1
+]
+]
+(
+_
+[
+6
+]
+)
+)</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59031db02b0070a923000110">One Line Task: Zero Or One</a></div><h6>JavaScript:</h6><div><pre>zeroOrOne=(j,y)=&gt;y[0]
+.map(($,I)=&gt;y.map(v=&gt;v[I])
+.sort()[j/2|0])</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55a29405bc7d2efaff00007c">Going to zero or to infinity?</a></div><h6>TypeScript:</h6><div><pre>export function going(m: number): number {
+  let total = 1, par = 1
+  for (let i = m; i &gt; 1; i--) {
+    par /= i
+    total += par
+  }
+  let res = total.toString().substring(0, 8)
+  return parseFloat(res)
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52a382ee44408cea2500074c">Matrix Determinant</a></div><h6>TypeScript:</h6><div><pre>export const determinant = (mtx:number[][]): number =&gt;{
+  const  reds = (a:number, x: number, i:number) =&gt;{
+       const arg = mtx.slice(1).map(f =&gt; f.filter(($, c) =&gt; c !== i))
+       return a + (i % 2 === 0 ? 1 : -1) * x * determinant(arg)
+    }
+  if (mtx.length === 1) return mtx[0][0]
+  else return mtx[0].reduce(reds,0)
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59c5c02423daccae7700017d">One Line Task: Date Of Solar Calendar</a></div><h6>JavaScript:</h6><div><pre>solarDate=q=&gt;(j=30,--q&lt;186?j=31:q-=6,q-=($=q%j),$+1+", "+"FOKTMSMAADBE"[o=q/j]+"arhiohebzeas"[o])</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/53d40c1e2f13e331fc000c26">The Millionth Fibonacci Kata</a></div><h6>JavaScript:</h6><div><pre>let fibmemo = {
+	0: 0n,
+	1: 1n,
+	2: 1n,
+	3: 2n,
+	4: 3n,
+	5: 5n,
+	6: 8n
+}
+function fib(fibN) {
+	if (fibN &lt; 0 &amp;&amp; fibN % 2 === 0) return -fib(Math.abs(fibN))
+	else if (fibN &lt; 0 &amp;&amp; fibN % 2 !== 0) return fib(Math.abs(fibN))
+	else {
+		if (fibmemo[fibN] === undefined) {
+			if (fibN % 2) {
+				let first = fib((fibN - 1) / 2)
+				let second = fib((fibN + 1) / 2)
+				fibmemo[fibN] = first ** 2n + second ** 2n
+			} else {
+				let first = fib(fibN / 2 - 1)
+				let second = fib(fibN / 2)
+				fibmemo[fibN] = (2n * first + second) * second
+			}
+		}
+	}
+	return fibmemo[fibN]
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/583d171f28a0c04b7c00009c">The maximum sum value of ranges -- Challenge version</a></div><h6>JavaScript:</h6><div><pre>function maxSum(mass,range){
+  let ms = [0],  vse = 0
+  for (let i of mass) ms.push(vse += i)
+  let res = range.map(([x, y]) =&gt; ms[y + 1] - ms[x])
+  return Math.max(...res)
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/583d10c03f02f41462000137">The maximum sum value of ranges -- Simple version</a></div><h6>JavaScript:</h6><div><pre>const maxSum = (ms,dpz) =&gt; {
+  const rd = (ac, el) =&gt; ac + el
+  const sumDP = ([bg, fin]) =&gt; ms
+  .slice(bg, fin + 1)
+  .reduce(rd)
+  return Math.max(...dpz.map(v =&gt; sumDP(v)))
+}</pre></div></div><div><div><div class="tag is-extra-wide is-inline mr-15px" border="true"><span>Beta</span></div><a target="_blank" href="https://www.codewars.com/kata/5841bfd463b25e48ee000037">Implement Debounce</a></div><h6>JavaScript:</h6><div><pre>const debounce = (fn, delay, immediate) =&gt; {
+  let timeClosure = Number.NEGATIVE_INFINITY
+  return function(){
+    let timeNow = Date.now()
+    if(timeNow - timeClosure &gt;= delay)
+      if(immediate === true) fn.apply(this, arguments)
+      else setTimeout(()=&gt;fn.apply(this, arguments),delay)
+    timeClosure = timeNow
+  }
+};
+</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/58de42bab4b74c214d0000e2">A Simple Music Decoder</a></div><h6>TypeScript:</h6><div><pre>export function uncompress(data: string): number[] {
+	let com = data.split(','),
+		res: number[] = [];
+	let rg = /^(-?\d+)-(-?\d+)(\/(\d+))?$/;
+	for (let s = 0; s &lt; com.length; s++) {
+		if (rg.test(com[s])) { // for intervals
+			let [beg, fin, cnt] = com[s]
+				.replace(rg, (_, m, n, o) =&gt; m + ' ' + n + (o ? ' ' + o.slice(1) : ''),)
+				.split(' ')
+				.map(Number);
+			if (!cnt) cnt = 1;
+			for (let j = beg; j !== fin; j += fin &lt; beg ? -cnt : cnt) res.push(j);
+			res.push(fin);
+		} else if (com[s].includes('*')) { // for count
+			let [num, c] = com[s].replace(/\*/g, ' ').split(' ').map(Number);
+			res = res.concat(new Array(c).fill(num));
+		} else res.push(+com[s]); // to num
+	}
+	return res;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5672682212c8ecf83e000050">Twice linear</a></div><h6>TypeScript:</h6><div><pre>export function dblLinear(mn:number):number {
+    let st = 1
+    if (mn === 0) return st
+    let collect = new Set()
+    collect.add(st)
+    while (collect.size &lt;= mn) {
+      st++
+      if (collect.has((st - 1)/2) || collect.has((st - 1)/3)) collect.add(st)
+    }
+    return st
+}</pre></div></div><div><div><div border="false"><div><span>1 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59a421985eb5d4bb41000031">Multi Line Task∞: Hello World</a></div><h6>JavaScript:</h6><div><pre>f
+=
+[
+,
+p
+,
+,
+t
+,
+,
+o
+,
+,
+r
+,
+,
+l
+,
+,
+n
+,
+,
+i
+,
+,
+d
+,
+,
+s
+,
+,
+b
+]
+=
+`
+s
+t
+o
+p
+b
+i
+l
+d
+j
+n
+`
+f
+=
+[
+]
+[
+s
++
+o
++
+n
++
+b
+]
+[
+l
++
+n
++
+b
++
+d
+]
+(
+`
+H
+e
+l
+l
+o
+,
+
+w
+o
+r
+l
+d
+!
+`
+[
+p
++
+r
++
+i
++
+n
++
+t
+]
+`
+`
+,
+[
+]
++
+[
+]
+)</pre></div></div><div><div><div border="false"><div><span>2 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5908242330e4f567e90000a3">One Line Task: Circle Intersection</a></div><h6>JavaScript:</h6><div><pre>with(Math)circleIntersection=([x,y],[i,j],D)=&gt;(-sin($=2*acos(hypot(i-x,j-y)/D/2))+$)*D**2|0;</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/537e18b6147aa838f600001b">Text align justify</a></div><h6>JavaScript:</h6><div><pre>const justify = (st, dlina) =&gt; {
+	let oneWords = st.split(' ')
+	let stroks = []
+	let lineEnd = oneWords.reduce((ln, word) =&gt; {
+		if (ln) {
+			if (ln.length + word.length + 1 &lt;= dlina) return ln + ' ' + word
+			stroks.push(ln)
+		}
+		return word
+	})
+	stroks = stroks.map(ln =&gt; {
+		if (ln.indexOf(' ') &gt;= 0)
+			for (let dlinaStroki = ln.length; dlinaStroki &lt; dlina;)
+				ln = ln.replace(/ +/g, (probels) =&gt; {
+					return probels + (dlinaStroki++ &lt; dlina ? ' ' : '')
+				})
+		return ln
+	})
+	lineEnd &amp;&amp; stroks.push(lineEnd)
+	return stroks.join('\n')
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59f061773e532d0c87000d16">Elevator Distance</a></div><h6>Python:</h6><div><pre>def elevator_distance(ar):
+    # your code here
+    myres = 0
+    for m in range(len(ar)-1):
+        myres += abs(ar[m] - ar[m+1])
+    return myres</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5412509bd436bd33920011bc">Credit Card Mask</a></div><h6>Python:</h6><div><pre># return
+# masked
+# string
+def maskify(cardCredit):
+    return (len(cardCredit)-4) * "#" + cardCredit[-4:]</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55c04b4cc56a697bb0000048">Scramblies</a></div><h6>Python:</h6><div><pre>def scramble(str1, str2):
+    for c in set(str2):
+        if str1.count(c) &lt; str2.count(c):
+            return False
+    return True</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/526dbd6c8c0eb53254000110">Not very secure</a></div><h6>Python:</h6><div><pre>def alphanumeric(passwAlphanum):
+    return passwAlphanum.isalnum()</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52bb6539a4cf1b12d90005b7">Battleship field validator</a></div><h6>JavaScript:</h6><div><pre>function validateBattlefield(base) {
+	let cn = 0
+	let os = 0
+	for (let row = 0; row &lt; base.length; row++) {
+		for (let col = 0; col &lt; base.length; col++) {
+			if (base[row][col] === 0) continue;
+			os++
+			if (row !== 0 &amp;&amp; col !== 0)
+				if (base[row - 1][col - 1] === 1) return false
+
+			if (row !== 0)
+				if (base[row - 1][col + 1] === 1) return false
+
+			if (col !== base.length - 1)
+				if (base[row][col + 1] === 1) cn++
+
+			if (row !== base.length - 1)
+				if (base[row + 1][col] === 1) cn++
+
+		}
+	}
+	if (cn === 10 &amp;&amp; os === 20) return true;
+	return false;
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/585894545a8a07255e0002f1">Screen Locking Patterns</a></div><h6>TypeScript:</h6><div><pre>const lines = {
+	'A': ['B', 'CB', 'D', 'E', 'F', 'GD', 'H', 'IE'],
+	'D': ['A', 'B', 'C', 'E', 'FE', 'G', 'H', 'I'],
+	'G': ['AD', 'B', 'CE', 'D', 'E', 'F', 'H', 'IH'],
+	'B': ['A', 'C', 'D', 'E', 'F', 'G', 'HE', 'I'],
+	'E': ['A', 'B', 'C', 'D', 'F', 'G', 'H', 'I'],
+	'H': ['A', 'BE', 'C', 'D', 'E', 'F', 'G', 'I'],
+	'C': ['B', 'AB', 'D', 'E', 'F', 'GE', 'H', 'IF'],
+	'F': ['A', 'B', 'C', 'DE', 'E', 'G', 'H', 'I'],
+	'I': ['AE', 'B', 'CF', 'D', 'E', 'F', 'GH', 'H']
+}
+type S = 'A' | 'D' | 'G' | 'B' | 'E' | 'H' | 'C' | 'F' | 'I'
+
+const validVariants = (circle: string, visited: string) =&gt; {
+	return lines[circle as S].reduce((arr: string[], pos) =&gt; {
+		let imp = pos.slice(0,1), nast;
+		if (pos.length &gt; 1)  nast = pos[1]
+		if (visited.indexOf(imp) === -1 &amp;&amp;	(!nast || visited.indexOf(nast) !== -1)) arr.push(imp)
+		return arr
+	}, [])
+}
+
+export const calculateCombinations = (beginCircle: string, length: number): number =&gt; {
+	if (beginCircle.length &gt; length) return 0
+	if (beginCircle.length === length) return 1
+	let all = 0
+	let atEnd = beginCircle.slice(-1)
+	let vozm = validVariants(atEnd, beginCircle)
+	if (beginCircle.length + 1 === length) return vozm.length
+	for (let newPosition of vozm) {
+		all += calculateCombinations(beginCircle + newPosition, length)
+	}
+	return all
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/557f6437bf8dcdd135000010">Large Factorials</a></div><h6>JavaScript:</h6><div><pre>const cashFactorial = {}
+const minS = (a, b) =&gt; a.length &lt; b.length ? a : b.length &lt; a.length ? b : a &lt; b ? a : b
+function mulStr(a, b) {
+	a = String(a)
+	b = String(b)
+	let min = minS(a,b)
+	let max = min === a ? b : a
+	let sArr = max.split('').reverse()
+	let result = [], ost = 0
+	for (let i = 0; i &lt; sArr.length; i++) {
+		let spb = +sArr[i] * min + ost
+		let des = spb % 10
+		ost = (spb - des) / 10
+		result.push(des)
+	}
+	if (ost) result.push(ost)
+	return result.reverse().join('')
+}
+function factorial(n) {
+	if (n &lt; 2) return '1'
+	if (!(n in cashFactorial)) {
+		let stroka = mulStr(factorial(n - 1), n)
+		cashFactorial[n] = stroka
+	}
+	return cashFactorial[n]
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59c2ff946bddd2a2fd00009e">Card-Chameleon, a Cipher with Playing Cards</a></div><h6>TypeScript:</h6><div><pre>import CardChameleonOutput from "./preloaded";
+
+const alb = ['A', '2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K']
+const BlackRow = alb.map(el =&gt; el + 'C').concat(alb.map(el =&gt; el + 'S'), 'XB')
+const RedRow = alb.map(el =&gt; el + 'D').concat(alb.map(el =&gt; el + 'H'), 'XR')
+const deckProcess = (arr: string[]) =&gt; {
+	let bl: string[] = [], rd: string[] = [], ds: string[] = []
+	for (let k of arr) {
+		BlackRow.includes(k)
+		  ? bl.push(k)
+		  : rd.push(k)
+	}
+	while (bl.length)
+		ds.unshift(...[rd.pop()!, bl.pop()!]) // to begin once red, once black
+	return ds
+}
+export default class CardChameleon {
+
+	public encrypt(mes: string, secretKey: string[]): string | null {
+	if (!mes) return ''
+  if(new Set(secretKey).size !== 54) return null
+ 	if (!/^[A-Z ]+$/.test(mes) ||	!secretKey.every(e =&gt; [...BlackRow, ...RedRow].includes(e))) return null
+  let tr = ''
+	let deck = deckProcess(secretKey)
+	for (let sym of mes) {
+    let shift = BlackRow[sym === ' ' ? 26 : sym.charCodeAt(0) - 65]
+		let rev = deck[deck.indexOf(shift) - 1]
+		let x = deck.indexOf(BlackRow[RedRow.indexOf(rev)]) - 1
+		let i = RedRow.indexOf(deck[x])
+		tr += i === 26 ? ' ' : String.fromCharCode(i + 65);
+		[deck[0], deck[x]] = [deck[x], deck[0]];  // swap
+		deck = deck.slice(2).concat(deck.slice(0, 2))
+	}
+	return tr
+	}
+
+	public decrypt(mes: string, secretKey: string[]): string | null {
+	if (!mes) return ''
+	if (new Set(secretKey).size !== 54) return null
+	if (!/^[A-Z ]+$/.test(mes) || !secretKey.every(e =&gt; [...BlackRow, ...RedRow].includes(e))) return null
+	let dck = deckProcess(secretKey), tr = ''
+	for (let sym of mes) {
+		let shift = dck.indexOf(RedRow[sym === ' ' ? 26 : sym.charCodeAt(0) - 65])
+		let c = dck[shift + 1]
+		let par = dck.indexOf(RedRow[BlackRow.indexOf(c)]) + 1
+		let i = BlackRow.indexOf(dck[par]);
+		tr += i === 26 ? ' ' : String.fromCharCode(i + 65);
+		[dck[0], dck[shift]] = [dck[shift], dck[0]];
+		dck = dck.slice(2).concat(dck.slice(0, 2))
+	}
+	return tr
+	}
+}
+</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59ccf051dcc4050f7800008f">Buddy Pairs</a></div><h6>TypeScript:</h6><div><pre>const razd = (t:number) =&gt; {
+	let otv = 0
+	for (let i = 2; i &lt;= Math.sqrt(t); i++) {
+		if (t % i === 0) i === t / i
+      ? otv += i
+      : otv += i + t / i
+	}
+	return otv
+}
+
+export function buddy(beg: number, lim: number): number[] {
+	for (let i = beg; i &lt;= lim; i++) {
+		let si = razd(i)
+		if (i &lt; si &amp;&amp; i === razd(si)) return [i, si]
+	}
+	return []
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54a91a4883a7de5d7800009c">String incrementer</a></div><h6>Python:</h6><div><pre>import re
+
+def increment_string(ss):
+    num = re.findall(r'\d+', ss)
+    if num:
+        s_n = num[-1]
+        ss = ss.rsplit(s_n, 1)[0]
+        num = str(int(s_n) + 1)
+        return ss + '0' * (len(s_n) - len(num)) + num
+    return ss + '1'
+</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55c4eb777e07c13528000021">Factorial tail</a></div><h6>PHP:</h6><div><pre># fixme
+function zeroes($bs, $nm){
+  if($bs+$nm === 40) return $bs;
+    for($i=2; $i&lt;=$bs; $i++){
+      if($bs%$i===0){
+        $mI=0;
+		    $c=0;
+        while($bs%$i === 0){
+           $bs=$bs/$i;
+           $mI++;
+        }
+        $ks = floor($nm/$i);
+        while($ks&gt;0) {
+          $c += $ks;
+          $ks = floor($ks/$i);
+        }
+        $res = floor($c/$mI);
+      }
+    }
+    $rc = $nm + $bs === $nm++ ? 11 : $res;
+    return $nm+$bs === $nm++ or $rc;
+  }</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5839c48f0cf94640a20001d3">Land perimeter</a></div><h6>PHP:</h6><div><pre>function land_perimeter($mass) {
+        for ($k=0; $k &lt; count($mass); $k++) {
+            for ($r=0; $r &lt; strlen($mass[$k]); $r++) {
+                if ($mass[$k][$r] === 'X') {
+                    $res += 4;
+                    $mass[$k][$r+1] !== 'X' ?: $res--;
+                    $mass[$k][$r-1] !== 'X' ?: $res--;
+                    $mass[$k+1][$r] !== 'X' ?: $res--;
+                    $mass[$k-1][$r] !== 'X' ?: $res--;
+                }
+            }
+        }
+        return 'Total land perimeter: '.$res;
+    }</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52a89c2ea8ddc5547a000863">Can you get the loop ?</a></div><h6>PHP:</h6><div><pre>function loop_size(Node $nd): int
+{
+    $s = 0;
+    while (!isset($nd-&gt;loop)) {
+        $nd-&gt;loop = $s;
+        $nd = $nd-&gt;getNext();
+        $s++;
+    }
+    return $s - $nd-&gt;loop;
+}</pre></div><h6>JavaScript:</h6><div><pre>const loop_size = (nd) =&gt; {
+	let mass = []
+	while (!~mass.indexOf(nd)) {
+		mass.push(nd)
+		nd = nd.next
+	}
+	return mass.length - mass.indexOf(nd)
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55aa075506463dac6600010d">Integers: Recreation One</a></div><h6>PHP:</h6><div><pre>function listSquared($m, $n)
+{
+    $finish = array();
+    foreach (range($m, $n) as $val) {
+        $totl = 0;
+        for ($i = 1; $i &lt; sqrt($val); $i++)
+            if ($val % $i === 0)
+                $totl += $i * $i + intdiv($val, $i) * intdiv($val, $i);
+
+        if ((int) sqrt($val) * (int) sqrt($val) === $val) $totl += $val;
+        if ((int) sqrt($totl) * (int) sqrt($totl) === $totl) $finish[] = [$val, $totl];
+    }
+    return $finish;
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/585d8c8a28bc7403ea0000c3">Find the unique string</a></div><h6>PHP:</h6><div><pre>function find_uniq($str): string
+{
+    $res = [];
+    foreach ($str as $val) {
+        $dubl = array_unique(str_split(strtolower($val)));
+        sort($dubl);
+        $key = implode('', $dubl);
+        $res[$key][] = $val;
+    }
+    foreach ($res as $vl)
+        if (count($vl) == 1) return $vl[0];
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/58db9545facc51e3db00000a">A Simple Music Encoder</a></div><h6>JavaScript:</h6><div><pre>function compress(mus) {
+	let len = mus.length
+	let ind = 0
+	let compress = []
+	let mem, cs, val
+	while(ind&lt;len){
+		if (ind + 1 &lt; len &amp;&amp; mus[ind + 1] === mus[ind]){
+			mem = mus[ind]
+			cs = 2
+			ind += 1
+			while (ind &lt; len &amp;&amp; mus[ind] == mem){
+				ind += 1
+				cs += 1
+			}
+			cs -= 1
+			ind -= 1
+			compress.push(`${mem}*${cs}`)
+		}
+		else if (ind + 2 &lt; len &amp;&amp; mus[ind + 2] - mus[ind + 1] === mus[ind + 1] - mus[ind]){
+			mem = mus[ind]
+			val = mus[ind + 1] - mus[ind]
+			ind += 2
+			while (ind &lt; len &amp;&amp; mus[ind] - mus[ind - 1] === val) ind += 1
+			ind -= 1
+			let v = Math.abs(val)
+			if(v===1) compress.push(`${mem}-${mus[ind]}`)
+			     else compress.push(`${mem}-${mus[ind]}/${v}`)
+
+		} else {
+			compress.push(String(mus[ind]))
+		}
+		ind += 1
+	}
+
+	return compress.join(',')
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5518a860a73e708c0a000027">Last digit of a huge number</a></div><h6>JavaScript:</h6><div><pre>// cycle rotation
+//0- [0,0,0,0]  all
+//1- [1,1,1,1]  all
+//2- [2,4,8,6]  4
+//3- [3,9,7,1]  4
+//4- [4,6,4,6]  2
+//5- [5,5,5,5]  all
+//6- [6,6,6,6]  all
+//7- [7,9,3,1]  4
+//8- [8,4,2,6]  4
+//9- [9,1,9,1]  2
+function lastDigit(as){
+  if(!as.length) return 1
+
+  let x = as.reduceRight((ac,n,ind)=&gt;{
+    let one = ac &lt; 4 ? ac : ac % 4 + 4
+    let zero = ind === 0 ? n%10 : n&lt;4 ? n : n%4 + 4
+    return Math.pow(zero,one)
+  }, 1)
+  return x % 10
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59016379ee5456d8cc00000f">One Line Task: Squirrel And Tree</a></div><h6>JavaScript:</h6><div><pre>squirrel=(x,H,$)=&gt;+(a=(x*x+$*$)**.5*H/x).toFixed(4)</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/58fecb82f3dff0a347000018">One Line Task: Remove Zeros</a></div><h6>JavaScript:</h6><div><pre>removeZeros=$=&gt;eval('['+/[^0,].*[^0,]/.exec($)+']')</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5acd142a2ec8c48521000104">One line task: Square Every Digit</a></div><h6>JavaScript:</h6><div><pre>sd=U=&gt;+(""+U).replace(/\d/g,$=&gt;$*$)
+</pre></div></div><div><div><div class="tag is-extra-wide is-inline mr-15px" border="true"><span>Draft</span></div><a target="_blank" href="https://www.codewars.com/kata/582ac1989759a2e9b50000d8">Count  Primes</a></div><h6>JavaScript:</h6><div><pre>// cash
+let primeCashe = []
+
+// the sieve of Eratosthenes
+let countPrimes2 = function (n) {
+	let s = new Uint8Array(n), res = 0
+	for (let y=2; y&lt;n; y++) {
+		if (s[y]) continue
+		res++
+		primeCashe[y] = res
+    let qr = y*y
+		for (let l=qr; l&lt;n; l+=y) s[l]=1
+	}
+};
+//for small number
+const isPrime = (n) =&gt; {
+	if (n &lt; 2) return 0
+	if (n === 2 || n === 3) return 1
+	if (n % 6 !== 1 &amp;&amp; n % 6 !== 5) return 0
+	let sqr = Math.floor(Math.sqrt(n))
+	for (let i = 5; i &lt;= sqr; i += 6)
+		if (n % i === 0 || n % (i + 2) === 0) return 0
+	return 1
+}
+function countPrimes(min, max) {
+	if (primeCashe.length === 0) countPrimes2(20000010) //one time -&gt; cash
+	let c = 0
+	if (max &lt; 1000) {
+		for (let i = min; i &lt;= max; i++) {
+			if (isPrime(i)) c++
+		}
+		return c
+	}
+let shift = 1 // for correction
+	let maxAr = max
+	while (!primeCashe[maxAr]) {maxAr++; shift =0}
+	let minAr = min
+	while (!primeCashe[minAr]) minAr++;
+	c = shift + primeCashe[maxAr] - primeCashe[minAr]
+	return c
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/522498c9906b0cfcb40001fc">Fibonacci Generator</a></div><h6>JavaScript:</h6><div><pre>function genfib(){
+  let gen = fibs()
+  return function(){
+    return gen.next().value
+  }
+}
+function* fibs(){
+  let mfn1 = 1
+  let mfn2 = 0
+  while (true){
+    let current = mfn2
+    mfn2 = mfn1
+    mfn1 = mfn1 + current
+    yield current
+  }
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54d496788776e49e6b00052f">Sum by Factors</a></div><h6>TypeScript:</h6><div><pre>const isPrime = (n: number) =&gt; {
+  if(n === 2 || n === 3) return 1
+  if(n % 6 !== 1 &amp;&amp; n % 6 !== 5) return 0
+  let sqr = Math.floor(Math.sqrt(n))
+  for(let i = 5; i &lt;= sqr; i += 6)
+    if(n % i === 0 || n % (i + 2) === 0) return 0
+  return 1
+}
+export function sumOfDivided(lst: number[]): number[][] {
+    let cBig: number = Math.max.apply(null, lst.map(Math.abs))
+    let isP: number[][] = []
+    for (let i = 2; i &lt;= cBig; i++)
+      if (isPrime(i)) {
+        let filt = lst.filter(n =&gt; !(n % i))
+        let total = filt.reduce((tot, t) =&gt; tot + t, 0)
+        if (filt.length) isP.push([i, total])
+      }
+    return isP
+}
+</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/573992c724fc289553000e95">Find the smallest</a></div><h6>JavaScript:</h6><div><pre>function smallest(fc) {
+	let resObj = [fc, 0, 0]
+	let liter = fc.toString()
+	for (let i = 0; i &lt; liter.length; i++) {
+		let cuted = liter.slice(0, i) + liter.slice(i + 1)// cut one sym
+		for (let s = 0; s &lt;= cuted.length; s++) {
+			let fndNum = +(cuted.slice(0, s) + liter[i] + cuted.slice(s))
+			if (resObj[0] &gt; fndNum) resObj = [fndNum, i, s]
+		}
+	}
+	return resObj
+}</pre></div></div><div><div><div class="tag is-long is-inline mr-15px" border="false"><span>Retired</span></div><a target="_blank" href="https://www.codewars.com/kata/52774a314c2333f0a7000688">Valid Parentheses</a></div><h6>JavaScript:</h6><div><pre>function validParentheses(ns) {
+	let s = ns
+	while (/\(\)/.test(s)){
+		s = s.replace(/\(\)/, '')
+}
+	return s.length === 0
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54521e9ec8e60bc4de000d6c">Maximum  subarray sum</a></div><h6>JavaScript:</h6><div><pre>const maxSequence = function(array){
+  let min = res = total = 0, i;
+  for (let j = 0; j &lt; array.length; ++j) {
+    total += array[j]
+    min = Math.min(total, min)
+    res = Math.max(res, total - min)
+  }
+  return res
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5279f6fe5ab7f447890006a7">Pick peaks</a></div><h6>PHP:</h6><div><pre>function pickPeaks($arr) {
+    $res = array("pos" =&gt; array(), "peaks" =&gt; array());
+    $s = -1;
+    for ($i = 1; $i &lt; count($arr); $i++) {
+        if ($arr[$i] &gt; $arr[$i - 1]) {
+            $s = $i;
+        } else if ($arr[$i] &lt; $arr[$i-1] &amp;&amp; $s !== -1) {
+            array_push($res["pos"], $s);
+            array_push($res["peaks"], $arr[$s]);
+            $s = -1;
+        }
+    }
+    return $res;
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52449b062fb80683ec000024">The Hashtag Generator</a></div><h6>PHP:</h6><div><pre>function generateHashtag($str) {
+    $b=trim($str);
+    if(strlen($b) == 0)return false;
+    $b = "#" . preg_replace_callback('|\w\S*|', function($m){
+    	return ucfirst(strtolower($m[0]));
+    }, $b);
+    $b = str_replace(" ", "",$b);
+    if($str &amp;&amp; strlen($b) &lt;= 140){
+      return $b;
+    }
+    return false;
+}</pre></div></div><div><div><div border="false"><div><span>2 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/56a73d2194505c29f600002d">Regular Expression - Check if divisible by 0b111 (7)</a></div><h6>JavaScript:</h6><div><pre>let q = '(?:0|11)'
+let q2 = '(?:1|00)'
+let n = q + q2
+let m = q2 + q
+let reg = '^(?:0|1(1|0('+n+')*(10|'+q+'01))(01*0(0|1('+m+')*(01|'+q2+'10)))*1)+$'
+// Write a regular expression to detect whether a binary number is divisible by 7
+// It won't be accepted if you code something else like Function
+let solution = new RegExp(reg)</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52685f7382004e774f0001f7">Human Readable Time</a></div><h6>PHP:</h6><div><pre>function human_readable($seconds) {
+  if ( $seconds &lt; 0 || $seconds &gt; 360000 ) {
+    return null;
+  }
+
+  $hours = floor( $seconds / 3600 );
+  $seconds -= $hours * 3600;
+  if ( $hours &lt; 10 ) {
+    $hours = '0' . $hours;
+  }
+
+  $minutes = floor( $seconds / 60 );
+  $seconds -= $minutes * 60;
+  if ( $minutes &lt; 10 ) {
+    $minutes = '0' . $minutes;
+  }
+
+  if ( $seconds &lt; 10 ) {
+    $seconds = '0' . $seconds;
+  }
+
+  return $hours . ':' . $minutes . ':' . $seconds;
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54b42f9314d9229fd6000d9c">Duplicate Encoder</a></div><h6>JavaScript:</h6><div><pre>const balance = (sm,_,a) =&gt; a.indexOf(sm) === a.lastIndexOf(sm) ? "(" : ")"
+function duplicateEncode(word) {
+  let arr = word.toLowerCase().split`` // to lower and split to array
+  let r = arr.map(balance)
+  return r.join``
+}
+</pre></div><h6>TypeScript:</h6><div><pre>const balance = (sm:string,_:number,array:string[]) =&gt; array.indexOf(sm) === array.lastIndexOf(sm) ? "(" : ")"
+export function duplicateEncode(word: string) {
+  let array:string[] = word.toLowerCase().split('') // to lower and split to array
+  let res:string[] = array.map(balance)
+  return res.join('')
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5868b2de442e3fb2bb000119">Closest and Smallest</a></div><h6>JavaScript:</h6><div><pre>function closest(numStr) {
+  if(numStr === '') return []
+  let whDif = []
+  let arrNum = numStr.split(' ') // to array
+  let arrPair = arrNum.map(n =&gt; n.split('').map(d =&gt; parseInt(d)))// to arr[arr]
+  let nb = arrNum.map(s =&gt; parseInt(s)) // to num
+  let wh = arrPair.map(n =&gt; n.reduce((acc, el) =&gt; acc += el, 0)) // reduce to weigths
+  let sortWh = wh.slice().sort((a, b) =&gt; a - b) // sort
+  for(let i = 0; i &lt; sortWh.length - 1; i++) {
+    let dif = sortWh[i + 1] - sortWh[i]
+    whDif.push(dif)
+  }
+  let ind = whDif.indexOf(Math.min(...whDif))
+  let arrWh = [sortWh[ind], sortWh[ind + 1]]
+  let whInd = arrWh[0] === arrWh[1]
+    ? [wh.indexOf(arrWh[0]), wh.indexOf(arrWh[1], wh.indexOf(arrWh[0]) + 1)]
+    : [wh.indexOf(arrWh[0]), wh.indexOf(arrWh[1])]
+
+  return [
+    [
+      arrWh[0],
+      whInd[0],
+      nb[whInd[0]]
+    ],
+    [
+      arrWh[1],
+      whInd[1],
+      nb[whInd[1]]
+    ]
+  ]
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5266876b8f4bf2da9b000362">Who likes it?</a></div><h6>Python:</h6><div><pre>def likes(srcStr):
+    res = ""
+    if (len(srcStr) == 0):
+        res = "no one likes this"
+    elif (len(srcStr) == 1):
+        res = str(srcStr[0]) + " likes this"
+    elif (len(srcStr) &gt; 1 and len(srcStr) &lt; 4):
+        for name in range(0, len(srcStr) - 1):
+            res = res + srcStr[name] + ", "
+        res = res[:-2]
+        res = res + " and " + str(srcStr[len(srcStr) - 1]) + " like this"
+    else:
+        for name in range(0, 2):
+            res = res + srcStr[name] + ", "
+        res = res[:-2]
+        res = res + " and " + str(len(srcStr)-2) + " others like this"
+    return res</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5726f813c8dcebf5ed000a6b">k-Primes</a></div><h6>PHP:</h6><div><pre>function countKprimes($k, $beg, $fin) {
+    $arr = array();
+    for($i = $beg; $i &lt;= $fin; $i++){
+        if(FactorsK($i) == $k) $arr[] = $i;
+    }
+    return $arr;
+}
+function FactorsK($n){
+    if ($n &lt; 1) return 0;
+    $sc = 0;
+    while ($n%2 == 0){
+        $n /= 2;
+        $sc++;
+    }
+    for ($i = 3; $i &lt;= sqrt($n); $i+=2) {
+        while($n%$i == 0){
+            $n /= $i;
+            $sc++;
+        }
+    }
+    return ($n &gt; 2) ? $sc+1 : $sc;
+}
+function puzzle($s) {
+    $prim1 = countKprimes(1, 1, $s);
+    $prim3 = countKprimes(3, 1, $s);
+    $prim7 = countKprimes(7, 1, $s);
+    $sc = 0;
+    for($a = 0; $a &lt; count($prim1); $a++){
+        for($b = 0; $b &lt; count($prim3); $b++){
+            for($c = 0; $c &lt; count($prim7); $c++){
+                if( $prim1[$a] + $prim3[$b] + $prim7[$c] == $s )
+                    $sc += 1;
+            }
+        }
+    }
+    return $sc;
+}
+
+</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5262119038c0985a5b00029f">Is a number prime?</a></div><h6>PHP:</h6><div><pre>function is_prime(int $num): bool {
+  if ($num &lt; 2) {
+     return false;
+  }
+  if ($num === 2 || $num === 3) {
+     return true;
+  }
+  if($num % 6 !== 1 &amp;&amp; $num % 6 !== 5) return false;
+  $sqr = floor(sqrt($num));
+  for($i = 5; $i &lt;= $sqr; $i += 6){
+    if($num % $i === 0 || $num % ($i + 2) === 0) return false;
+  };
+  return true;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52b7ed099cdc285c300001cd">Sum of Intervals</a></div><h6>JavaScript:</h6><div><pre>function sumIntervals(dp) {
+	let dpz = dp.sort((a, b) =&gt; a[0] - b[0])
+	let lenc = 0
+	let lc = Number.NEGATIVE_INFINITY
+	for (let[one, two] of dpz) {
+		let per = one &lt; lc ? Math.min(two, lc) - one : 0
+		lc = Math.max(two, lc)
+		lenc += two - one - per
+	}
+	return lenc
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5e320fe3358578001e04ad55">One line task: Is the King in check ?</a></div><h6>JavaScript:</h6><div><pre>isCheck=j=&gt;(p='        ',t=j.map(b=&gt;b.join``).join(p),f=(g,...a)=&gt;a.map(n=&gt;[g,[...p].map((y,i)=&gt;n*i+n)]),[[/♟/,[-15,-17]],[/♞/,[-33,-31,-18,-14,14,18,31,33]],...f(/^ *[♝♛]/,17,15,-17,-15),...f(/^ *[♜♛]/,1,-1,-16,16)].some(([o,u])=&gt;o.test(u.map(v=&gt;t[t.indexOf('♔')+v]).join``)))</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5e28ae347036fa001a504bbe">Is the King in check ?</a></div><h6>JavaScript:</h6><div><pre>const KING = '♔'
+const QUEEN = '♛'
+const BISHOP = '♝'
+const KNIGHT = '♞'
+const ROOK = '♜'
+const PAWN = '♟'
+const EMPTY = ' '
+
+function kingIsInCheck(chessBoard) {
+	for (let i = 0; i &lt; 8; i++) {
+		for (let j = 0; j &lt; 8; j++) {
+			if (chessBoard[i][j] == KING) {
+
+				if (checkKnight(chessBoard, KNIGHT, i, j))
+					return true;
+
+				if (checkPawn(chessBoard, PAWN, i, j))
+					return true;
+
+				if (checkRock(chessBoard, ROOK, i, j))
+					return true;
+
+				if (checkBishop(chessBoard, BISHOP, i, j))
+					return true;
+
+				if (checkQueen(chessBoard, QUEEN, i, j))
+					return true;
+			}
+		}
+	}
+	return false;
+}
+function checkCondition(i, j) {
+	return i &gt;= 0 &amp;&amp; i &lt; 8 &amp;&amp; j &gt;= 0 &amp;&amp; j &lt; 8;
+}
+function checkKnight(board, c, i, j) {
+	// All possible moves of the knight
+	let x = [2, 2, -2, -2, 1, 1, -1, -1];
+	let y = [1, -1, 1, -1, 2, -2, 2, -2];
+
+	for (let k = 0; k &lt; 8; k++) {
+		let m = i + x[k];
+		let n = j + y[k];
+		if (checkCondition(m, n) &amp;&amp; board[m][n] == c)
+			return true;
+	}
+	return false;
+}
+function checkPawn(board, c, i, j) {
+	let lookFor;
+	lookFor = c;
+	if (checkCondition(i - 1, j - 1)
+		&amp;&amp; board[i - 1][j - 1] == lookFor)
+		return true;
+	if (checkCondition(i - 1, j + 1)
+		&amp;&amp; board[i - 1][j + 1] == lookFor)
+		return true;
+	return false;
+}
+function checkRock(board, c, i, j) {
+
+	// Check downwards
+	let k = 0;
+	while (checkCondition(i + ++k, j)) {
+		if (board[i + k][j] == c)
+			return true;
+		if (board[i + k][j] != EMPTY)
+			break;
+	}
+
+	// Check upwards
+	k = 0;
+	while (checkCondition(i + --k, j)) {
+		if (board[i + k][j] == c)
+			return true;
+		if (board[i + k][j] != EMPTY)
+			break;
+	}
+
+	// Check right
+	k = 0;
+	while (checkCondition(i, j + ++k)) {
+		if (board[i][j + k] == c)
+			return true;
+		if (board[i][j + k] != EMPTY)
+			break;
+	}
+
+	// Check left
+	k = 0;
+	while (checkCondition(i, j + --k)) {
+		if (board[i][j + k] == c)
+			return true;
+		if (board[i][j + k] != EMPTY)
+			break;
+	}
+	return false;
+}
+function checkBishop(board, c, i, j) {
+	// Check the lower right diagonal
+	let k = 0;
+	while (checkCondition(i + ++k, j + k)) {
+		if (board[i + k][j + k] == c)
+			return true;
+		if (board[i + k][j + k] != EMPTY)
+			break;
+	}
+
+	// Check the lower left diagonal
+	k = 0;
+	while (checkCondition(i + ++k, j - k)) {
+		if (board[i + k][j - k] == c)
+			return true;
+		if (board[i + k][j - k] != EMPTY)
+			break;
+	}
+
+	// Check the upper right diagonal
+	k = 0;
+	while (checkCondition(i - ++k, j + k)) {
+		if (board[i - k][j + k] == c)
+			return true;
+		if (board[i - k][j + k] != EMPTY)
+			break;
+	}
+
+	// Check the upper left diagonal
+	k = 0;
+	while (checkCondition(i - ++k, j - k)) {
+		if (board[i - k][j - k] == c)
+			return true;
+		if (board[i - k][j - k] != EMPTY)
+			break;
+	}
+
+	return false;
+}
+function checkQueen(board, c, i, j) {
+	if (checkBishop(board, c, i, j) || checkRock(board, c, i, j))
+		return true;
+	return false;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/60790e04cc9178003077db43">Balanced parentheses string </a></div><h6>JavaScript:</h6><div><pre>function balancedParens(n, ks) {
+  if(n === 0) return ''
+  if(ks &lt; 0) return null
+  let ind = ks + 1n
+  let ln = new Array(n + 1).fill(0n)
+  let matrix = new Array(2 * n + 1).fill(0)
+  for(let i = 0; i &lt;= matrix.length - 1; i++) matrix[i] = [...ln]
+  matrix[0][0] = 1n
+  for(let i = 0; i &lt; n * 2; ++i) {
+    for(let j = 0; j &lt;= n; ++j) {
+      if(j + 1 &lt;= n) matrix[i + 1][j + 1] += matrix[i][j]
+      if(j &gt; 0) matrix[i + 1][j - 1] += matrix[i][j]
+    }
+  }
+  if(ind &gt; matrix[2 * n][0]) return null
+
+  let res = ''
+  let shift = 0
+
+  for(let i = n * 2 - 1; i &gt;= 0; --i) {
+    if(shift + 1 &lt;= n &amp;&amp; matrix[i][shift + 1] &gt;= ind) {
+      res += '('
+      ++shift
+    } else {
+      res += ')'
+      if(shift + 1 &lt;= n)
+        ind = ind - BigInt(matrix[i][shift + 1])
+      --shift
+    }
+  }
+  return res
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/526989a41034285187000de4">Count IP Addresses</a></div><h6>JavaScript:</h6><div><pre>function ipsBetween(fs, sc) {
+	const red = (acc, s) =&gt; acc*256+s
+	const convert = (IP) =&gt; IP.split('.')
+		.map(nl =&gt; parseInt(nl))
+		.reduce(red)
+	return convert(sc) - convert(fs);
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5886d65e427c27afeb0000c1">Simple Fun #23: Square Digits Sequence</a></div><h6>JavaScript:</h6><div><pre>function squareDigitsSequence(ch, ar = []) {
+	const sqr = (x, q) =&gt; x + q * q
+  ar.push(ch)
+  ch = String(ch)
+    .split``
+    .reduce(sqr, 0)
+  if (ar.includes(ch)) {
+    return ++ar.length;
+  }
+  return squareDigitsSequence(ch, ar);
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/58b57f984f353b3dc9000030">One Line Task: Palindrome String</a></div><h6>JavaScript:</h6><div><pre>palindrome=p=(n,[v,...g])=&gt;g!=![]?v+p(n-2,g)+v:v.repeat(n)</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55695bc4f75bbaea5100016b">Fibonacci Streaming</a></div><h6>TypeScript:</h6><div><pre>export function* fibonacciSequence(): Iterator&lt;number&gt;{
+  let mfn1 = 1
+  let mfn2 = 1
+  while (true){
+    let current = mfn2
+    mfn2 = mfn1
+    mfn1 = mfn1 + current
+    yield current
+  }
+}
+</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/555624b601231dc7a400017a">Josephus Survivor</a></div><h6>TypeScript:</h6><div><pre>const arrCreate = (a: number, b: number): number[] =&gt; {
+  const n = b - a + 1
+  return Array.from(Array(n).keys()).map(x =&gt; x + a)
+}
+export function josephusSurvivor(num: number, kl: number): number {
+  return arrCreate(1, num).reduce((elem, dl) =&gt; (elem + kl - 1) % dl + 1)
+}
+</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/591e833267cd75cb02000007">One Line Task: Check Range</a></div><h6>JavaScript:</h6><div><pre>checkRange=(m,x,y)=&gt;m.map(h=&gt;e+=x&gt;h==h&gt;y,e=0)|e</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55983863da40caa2c900004e">Next bigger number with the same digits</a></div><h6>JavaScript:</h6><div><pre>function nextBigger(noBig) {
+	let splited = noBig.toString().split``.map(el =&gt; +el)
+	let leng = splited.length - 1
+	for (let i = leng; i &gt; 0; i--) {
+		if (splited[i] &gt; splited[i - 1]) {
+			let b = splited.slice(i)
+			let a = splited.slice(0, i - 1)
+			let D = splited[i - 1]
+			let max = b.filter(el =&gt; el &gt; D).sort()[0]
+			b[b.indexOf(max)] = D
+			D = [...a, max, ...b.sort()].join``
+			return Number(D)
+		}
+	}
+	return -1;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/51ba717bb08c1cd60f00002f">Range Extraction</a></div><h6>JavaScript:</h6><div><pre>const beth = (el, ind, par) =&gt; {
+	if ((el === par[ind + 1] - 1) &amp;&amp; (el === par[ind - 1] + 1)) return true
+	return false
+}
+const solution = spisok =&gt;{
+	const SP = '@'
+  const reg = new RegExp(`(,${SP})+,`, 'g')
+return spisok.map((num, i, arr) =&gt; beth(num, i, arr) ? SP : num)
+			.toString()
+			.replace(reg, '-');
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5426d7a2c2c7784365000783">All Balanced Parentheses</a></div><h6>JavaScript:</h6><div><pre>function balancedParens(n) {
+	const combination = []
+	const recFn = (str, strt, end) =&gt; {
+		if (n === end) return combination.push(str)
+		const flagStart =  n &gt; strt, flagEnd = strt &gt; end
+		flagStart &amp;&amp; recFn(str + '(', strt + 1, end)
+		flagEnd   &amp;&amp; recFn(str + ')', strt, end + 1)
+	}
+	recFn('', 0, 0)
+	return combination
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5571d9fc11526780a000011a">The builder of things</a></div><h6>JavaScript:</h6><div><pre>class Thing {
+	constructor(name) {
+		this.name = name;
+    this.is_not_a = new Proxy(this, {
+			get: (target, name) =&gt; {
+				const propName = `is_a_${name}`;
+				Reflect.defineProperty(target, propName, { value: false });
+				return target[propName];
+			}
+		});
+		this.is_a = new Proxy(this, {
+			get: (target, name) =&gt; {
+				if (typeof n === 'symbol') {
+					return target[n];
+				}
+				const propName = `is_a_${name}`;
+				Reflect.defineProperty(target, propName, { value: true });
+				return target[propName];
+			}
+		});
+    this.has = (nm) =&gt; new Proxy(this, {
+			get: (target, name) =&gt; {
+				let znachenie;
+				if (nm &gt; 1) {
+					const part = name.substring(0, name.length - 1);
+					znachenie = new Array(nm).fill(part).map(n =&gt; new Thing(n));
+					znachenie.each = (fn) =&gt; {
+						let native = fn.toString();
+						const arrowIndex = native.indexOf('=&gt;');
+						const allArg = native.substring(0, arrowIndex - 1);
+						native = `${allArg} =&gt; ${allArg}.${native.substring(arrowIndex + 3)}`;
+						const compiled = eval(native);
+						znachenie.forEach(compiled);
+					}
+				} else {
+					znachenie = new Thing(name);
+				}
+				Reflect.defineProperty(target, name, { value: znachenie });
+				return target[name];
+			}
+		});
+    this.having = this.has
+    this.is_the = new Proxy(this, {
+			get: (target, name) =&gt; {
+				return new Proxy(target, {
+					get: (obj, proxValue) =&gt; {
+						Reflect.defineProperty(obj, name, { value: proxValue });
+						return target;
+					}
+				});;
+			}
+		});
+    this.and_the = this.is_the
+    this.being_the = this.is_the
+
+		this.can = new Proxy(this, {
+			get: (target, name) =&gt; {
+				const proxyFunc = (solo, twice) =&gt; {
+					let arrMatch;
+					let reg = /\${(\w+)}/g;
+					let userFn = twice ? twice : solo;
+					let isProp = twice ? solo : null;
+					let native = userFn.toString();
+					let endFn = native;
+					while (arrMatch = reg.exec(native)) {
+						const match = target[arrMatch[1]];
+						if (match) endFn = endFn.replace(arrMatch[0], match);
+					}
+					endFn = eval(endFn);
+					if (isProp) {
+						endFn = new Proxy(endFn, {
+							apply: (evalFunction, thisArg, argsF) =&gt; {
+								const reflValue = target[isProp] ? target[isProp] : new Array();
+								reflValue.push(evalFunction.apply(thisArg, argsF))
+								Reflect.defineProperty(target, isProp, { value: reflValue });
+								return target;
+							}
+						});
+					}
+					Reflect.defineProperty(target, name, { value: endFn });
+				};
+				return proxyFunc;
+			}
+		});
+
+    }
+}</pre></div></div><div><div><div border="false"><div><span>2 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5935558a32fb828aad001213">Multi Line Task++: Hello World</a></div><h6>JavaScript:</h6><div><pre>f=
+''
+[
+`\
+c\
+o\
+n\
+c\
+a\
+t`
+][
+'\
+b\
+i\
+n\
+d'
+]
+`\
+H\
+e\
+l\
+l\
+o\
+,\
+ \
+w\
+o\
+r\
+l\
+d\
+!`
+</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54f6e7a62e2c167e29000112">Don't rely on luck HARDCORE</a></div><h6>JavaScript:</h6><div><pre>// The answer to everything, huh?
+guess=42
+
+function* alpha(individ) {
+  let base = individ/100000
+  let mini = 1.0000000000000001e-7
+  while(1){
+    base = base - mini
+    yield base
+  }
+}
+let gen = alpha(guess)
+Math = Object.create(Math, {
+	random: {
+		value: ()=&gt;gen.next().value
+	}
+})
+
+Math.random.toString = function () {
+	return `function random() { [native code] }`;
+};
+
+Object.freeze(Math);
+//(function(){</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5268af3872b786f006000228">Don't rely on luck.</a></div><h6>JavaScript:</h6><div><pre>var guess = 10
+Math.floor = () =&gt; { return 2**2+2*3 }</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/556025c8710009fc2d000011">(L33T + Grεεκ) Case</a></div><h6>JavaScript:</h6><div><pre>function GrεεκL33t(stroka) {
+	let toSymb = {
+		a: "α",	b: "β",	d: "δ",	e: "ε",	i: "ι",
+		k: "κ",	n: "η",	o: "θ",	p: "ρ",	r: "π",
+		t: "τ",	u: "μ",	v: "υ",	w: "ω",	x: "χ",
+		y: "γ"
+	}
+	return stroka.toLowerCase()
+		.split('')
+		.map(el =&gt; toSymb[el] || el)
+    .join('')
+}</pre></div></div><div><div><div class="tag is-long is-inline mr-15px" border="false"><span>Retired</span></div><a target="_blank" href="https://www.codewars.com/kata/52aae14aa7fd03d57400058f">Remove Zeros</a></div><h6>JavaScript:</h6><div><pre>function removeZeros(array) {
+  let len = array.length
+  let res = [];
+  let zer = [];
+  let zcount = 0;
+  let rcount = 0;
+  for(let i=0; i&lt;len; i++){
+    let m1 = array[i]
+    if(m1===0 || m1==='0') {zer[zcount] = m1; zcount++ }
+    else {res[rcount] = m1; rcount++ }
+  }
+
+  for(let i=0; i&lt;zer.length; i++){
+    res[rcount] = zer[i]
+    rcount++
+  }
+return res
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54d81488b981293527000c8f">Sum of Pairs</a></div><h6>TypeScript:</h6><div><pre>export const sumPairs = (ints: number[], s: number): [number, number] | void =&gt; {
+  if(ints.length &lt; 2) return undefined
+  let objSet = new Set()
+  objSet.add(ints[0])
+  let len = ints.length
+  for(let i = 1; i &lt; len; ++i) {
+    let needed = s - ints[i]
+    if(objSet.has(needed)) {
+      return [needed, ints[i]]
+    }
+    objSet.add(ints[i])
+  }
+  return undefined
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5647c3858d4acbbe550000ad">Regular expression for binary numbers divisible by 5</a></div><h6>TypeScript:</h6><div><pre>export const divisibleByFive = /^(0+|1((10)*(0|11)(01*01)*01*00)*(10)*(0|11)(01*01)*1)+$/
+//
+</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5550d638a99ddb113e0000a2">Josephus Permutation</a></div><h6>TypeScript:</h6><div><pre>type items = number | string
+export const josephus = (items: items[], k: number): items[] =&gt; {
+ let oldArr: items[] =[...items]
+ let midArr: items[] = []
+ let cnt = items.length
+ let i = 0
+ let arr: items[] = []
+ while(cnt&gt;0){
+   arr = arr.concat(oldArr.filter((el,ind)=&gt;{
+      i++
+     if(i % k === 0) return true
+      else{
+          midArr.push(el)
+          return false
+         }
+   }))
+ oldArr =  [...midArr]
+ midArr = []
+ cnt=oldArr.length
+ }
+  return arr
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54d512e62a5e54c96200019e">Primes in numbers</a></div><h6>TypeScript:</h6><div><pre>interface INum {
+    [key: number]: number
+}
+export const primeFactors = (n:number): string =&gt; {
+  let numDiv: number[] = [], obj: INum = {}, res = ''
+
+  function recursiv(n: number): void {
+    if(n &gt; 1) {
+      for(let i = 2; i &lt;= n; i++) {
+        if(n % i === 0) {
+          numDiv.push(i)
+          recursiv(n / i)
+          break
+        }
+      }
+    }
+  }
+
+  recursiv(n)
+  numDiv.map(x =&gt; {
+    obj[x] ? obj[x]++ : obj[x] = 1
+  })
+  for(let num in obj) {
+    obj[num] === 1 &amp;&amp; (res += '(' + num + ')')
+    obj[num] &gt; 1 &amp;&amp; (res += '(' + num + '**' + obj[num] + ')')
+  }
+  return res
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/56b5afb4ed1f6d5fb0000991">Reverse or rotate?</a></div><h6>TypeScript:</h6><div><pre>export function revRot (s: string, sz: number): string {
+  if(sz &lt;= 0 || s == '' || sz &gt; s.length) return ''
+  const fPow = (a: number, c: string) =&gt; a + Math.pow(+c, 3)
+  const arr = []
+  const sim = s.split('')
+  while(sim.length &gt;= sz) arr.push(sim.splice(0, sz))
+
+  const final = arr.map(el =&gt; {
+    const powSum = el.reduce(fPow, 0)
+    if(+powSum % 2) {
+      el.push(el[0])
+      el.shift()
+      return el.join('')
+    } else {
+      return el.reverse().join('')
+    }
+  })
+  return final.join('')
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/561e9c843a2ef5a40c0000a4">Gap in Primes</a></div><h6>TypeScript:</h6><div><pre>const isprime = (n: number) =&gt; {
+  if(n === 2 || n === 3) return 1
+  if(n % 6 !== 1 &amp;&amp; n % 6 !== 5) return 0
+  let sqr = Math.floor(Math.sqrt(n))
+  for(let i = 5; i &lt;= sqr; i += 6)
+    if(n % i === 0 || n % (i + 2) === 0) return 0
+  return 1
+}
+
+export const gap = (g: number, m: number, n: number): number[]|null =&gt; {
+  let para = []
+  para[0] = 0, para[1] = 0
+  let first = 0
+  if(m &gt;= n) return para
+  for(let i = m; i &lt;= n; i++) {
+    if(isprime(i)) {
+      if(first === 0) first = i
+      else if(i - first === g) {
+        para[0] = first
+        para[1] = i
+        return para
+      } else first = i
+    }
+  }
+  if(para[0] === para[1]) return null
+  return para
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5287e858c6b5a9678200083c">Does my number look big in this?</a></div><h6>TypeScript:</h6><div><pre>export function narcissistic(val: number): boolean {
+  let arr = String(val).split('')
+  let arrExp = arr.map(el =&gt; Math.pow(+el, arr.length))
+  let sum = arrExp.reduce((ac,v)=&gt; ac + v, 0)
+  return val === sum
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5277c8a221e209d3f6000b56">Valid Braces</a></div><h6>TypeScript:</h6><div><pre>type br = '(' | '{' | '['
+export function validBraces(braces: string): boolean{
+  let matches = { '(':')', '{':'}', '[':']' }
+  let stack:br[] = []
+  let curChar:br
+
+  for (let i=0; i&lt;braces.length; i++) {
+    curChar = braces[i] as br
+    if (matches[curChar]) stack.push(curChar)
+    else if (curChar !== matches[stack.pop()!]) return false
+  }
+  return stack.length === 0
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/53f40dff5f9d31b813000774">Recover a secret string from random triplets</a></div><h6>JavaScript:</h6><div><pre>const recoverSecret = (triArr) =&gt; {
+  const check = (bool, trip) =&gt; trip.indexOf(candidat) &gt; 0 ? false : bool
+  let totalSymbols = 3 * triArr.length
+  let res = '', candidat
+  while (totalSymbols &gt; 0) {
+    for (let tri of triArr) {
+      if (tri.length === 0) continue
+      candidat = tri[0]
+      if (!triArr.reduce(check, true)) continue
+      res += candidat
+      triArr.map( el =&gt; {
+        if (el.indexOf(candidat) === 0) {
+          totalSymbols--
+          el.shift()
+        }
+      })
+      break
+    }
+  }
+  return res
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/51e04f6b544cf3f6550000c1">Beeramid</a></div><h6>TypeScript:</h6><div><pre>export function beeramid(bonus: number, price: number): number {
+  let result: number = 0
+  let moneyBon = bonus
+  for(let i = 1; i &lt;= bonus; i++) {
+    moneyBon = moneyBon - ((i ** 2) * price)
+    if(moneyBon &gt;= 0) {
+      result += 1
+    }
+  }
+  return result
+}</pre></div><h6>JavaScript:</h6><div><pre>var beeramid = function(bonus, price) {
+  if (bonus &lt; price) return 0
+  let total = Math.floor(bonus / price)
+  if(total &lt; 5 ) return 1
+  let level = 1
+  let used = 1
+  while((total-used) &gt; 0){
+    total = total-used
+    used = (level + 1)**2
+    if(total-used &gt;= 0) level++
+  }
+  return level
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52cf02cd825aef67070008fa">Help the general decode secret enemy messages.</a></div><h6>JavaScript:</h6><div><pre>device.decode = function (st) {
+  let innerKey = device.encode ('a'.repeat(66))
+  let period = innerKey.length
+  let arr = st.split('')
+  let par = arr.map( (symb,i) =&gt;
+    ~innerKey.indexOf(symb)
+      ? innerKey[(innerKey.indexOf(symb) - i + period - 1) % period ]
+      : symb
+  )
+  return par.join('')
+}
+
+
+
+</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54cf7f926b85dcc4e2000d9d">Huffman Encoding</a></div><h6>JavaScript:</h6><div><pre>let code = {}
+
+function frequencies(str) {
+  let chastota = {}
+  for(let i in str) chastota[str[i]] === undefined ? chastota[str[i]] = 1 : chastota[str[i]]++
+  return Object.entries(chastota)
+}
+
+function sorting(freqs) {
+  let newfreqs = freqs.map(el=&gt;[...el])
+  let tuples = newfreqs.map(el=&gt;el.reverse())
+  return tuples.sort()
+}
+
+function makeNode(arr) {
+  while(arr.length &gt; 1) {
+    let tw = [arr[0][1], arr[1][1]]
+    let rst = arr.slice(2, arr.length)
+    let fr = arr[0][0] + arr[1][0]
+    arr = rst
+    end = [fr, tw]
+    arr.push(end)
+    arr.sort()
+  }
+  return arr[0][1]
+}
+
+function recursNode(node, pat) {
+  if(typeof (node) == typeof (''))
+    code[node] = pat
+  else {
+    recursNode(node[0], pat + '0')
+    recursNode(node[1], pat + '1')
+  }
+
+}
+
+function encode(freqs, s) {
+  if(freqs.length &lt;= 1) return null
+  if(s==='') return ''
+  let pat = ''
+  let sort = sorting(freqs)
+  let tree = makeNode(sort)
+  let res = recursNode(tree, pat)
+  let output = ''
+  for(el in s) output += code[s[el]]
+  return output
+}
+
+function decode(freqs, bits) {
+  if(freqs.length &lt;= 1) return null
+  if(bits==='') return ''
+  let sort = sorting(freqs)
+  let tree = makeNode(sort)
+  let output = ''
+  let p = tree
+  for(let bit in bits) {
+    if(bits[bit] == '0') p = p[0]
+    else{
+      p = p[1]
+    }
+    if(typeof (p) == typeof ('')) {
+      output += p
+      p = tree
+    }
+  }
+  return output
+}
+</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/525caa5c1bf619d28c000335">Tic-Tac-Toe Checker</a></div><h6>JavaScript:</h6><div><pre>const getReg = n =&gt; {
+  const line = `${n}`.repeat(3)
+  const diagonal1 = `${n}..`.repeat(2)+`${n}`
+  const  vertikal = `${n}...`.repeat(2)+`${n}`
+  const diagonal2 = `${n}....`.repeat(2)+`${n}`
+  return new RegExp(`${line}|${diagonal1}|${vertikal}|${diagonal2}`)
+}
+function isSolved(board) {
+  let line = board.join('#').replace(/,/g,'');
+  const reg1 = getReg(1)
+  const reg2 = getReg(2)
+  if(reg1.test(line)) return 1;
+  if(reg2.test(line)) return 2;
+  if(/0/.test(line)) return -1;
+  return 0;
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52e1476c8147a7547a000811">Regex Password Validation</a></div><h6>JavaScript:</h6><div><pre>// assign your RegExp to REGEXP
+const REGEXP = /^(?=.*[A-Z])(?=.*[a-z])(?=.*[0-9])[a-zA-Z0-9]{6,}$/;</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/530e15517bc88ac656000716">Rot13</a></div><h6>JavaScript:</h6><div><pre>const all = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ".split('')
+const SHIFT = 13
+const DIV = all[SHIFT-1]
+const repl = sym =&gt; String.fromCharCode(sym.charCodeAt(0) + (sym.toLowerCase() &lt;= DIV ? SHIFT : -SHIFT))
+function rot13(message) {
+    return message.replace(/[a-z]/gi, repl);
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/534e01fbbb17187c7e0000c6">Make a spiral</a></div><h6>JavaScript:</h6><div><pre>const spiralize = n =&gt; {
+  return Array(n)
+    .fill(Array(n).fill(0))
+    .map((row, rowIndex) =&gt;
+      row.map((_, colIndex) =&gt; logic(colIndex, rowIndex, n))
+    )
+}
+
+const logic = (colIndex, rowIndex, n) =&gt; {
+  const top = (rowIndex &lt; n / 2 &amp;&amp; rowIndex % 2 === 0 &amp;&amp; colIndex &gt;= rowIndex - 2 &amp;&amp; colIndex &lt;= n - rowIndex - 1)
+  const bottom = ((n - rowIndex) % 2 === 1 &amp;&amp; colIndex &gt; n - rowIndex - 1 &amp;&amp; colIndex &lt; rowIndex)
+  const left = (colIndex % 2 === 0 &amp;&amp; rowIndex &gt; colIndex + 1 &amp;&amp; rowIndex &lt; n - colIndex)
+  const right = ((n - colIndex) % 2 === 1 &amp;&amp; rowIndex &gt; n - colIndex - 1 &amp;&amp; rowIndex &lt;= colIndex)
+  if(top || bottom || left || right) return 1
+  return 0
+}</pre></div></div><div><div><div border="false"><div><span>3 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/59b81886460387d8fc000043">The soul of wit: reverse an array</a></div><h6>JavaScript:</h6><div><pre>reverse=a=&gt;a.map(a.pop,[...a])</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5270f22f862516c686000161">Base64 Encoding</a></div><h6>JavaScript:</h6><div><pre>const symbols = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/='
+String.prototype.toBase64 = function() {
+  let code = ''
+  const len = this.length
+  for(let i = 0; i &lt; len; i++) {
+    const bin = '00000000' + this.charCodeAt(i).toString(2)
+    code += bin.substring(bin.length - 8) // с конца 8символов
+  }
+  if(len % 3 === 1) {
+    code += '0000000000000000'
+  } else if(len % 3 === 2) {
+    code += '00000000'
+  }
+  let result = ''
+  for(let i = 0; i &lt; code.length; i += 6) {
+    const n = parseInt(code.substring(i, i+6), 2)
+    result += symbols[n]
+  }
+  return result
+}
+
+String.prototype.fromBase64 = function() {
+  let code = ''
+  for(let i = 0; i &lt; this.length; i++) {
+    const str = '000000' + symbols.indexOf(this[i]).toString(2)
+    code += str.substring(str.length - 6)
+  }
+  let result = ''
+  for(let i = 0; i &lt; code.length; i += 8) {
+    const str = parseInt(code.substring(i, i + 8), 2)
+    result += String.fromCharCode(str)
+  }
+  return result
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/596d34df24a04ee1e3000a25">Count ones in a segment</a></div><h6>JavaScript:</h6><div><pre>const countOnes = (left, right) =&gt; {
+  const ds = n =&gt; {
+    let bt = 0
+    for(let i = 0; i &lt; 30; ++i){
+      const left1 = 1 &lt;&lt; i
+      const left2 = 2 &lt;&lt; i
+      const delim = (n + 1) / left2
+      const floor = Math.floor(delim)
+      const param = Math.max(0, (delim - floor) * left2 - left1)
+      bt += floor * left1 + param
+    }
+    return bt
+  }
+  return ds(right) - ds(left - 1)
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5324945e2ece5e1f32000370">Sum Strings as Numbers</a></div><h6>JavaScript:</h6><div><pre>function sumStrings (a, b) {
+  let res = '', c = 0
+  let aa = a.split('')
+  let bb = b.split('')
+  while (aa.length || bb.length || c) {
+    c += (parseInt(aa.pop()) || 0) + (parseInt(bb.pop()) || 0)
+    res = c % 10 + res
+    c = c &gt; 9
+  }
+  return res.replace(/^0+/, '')
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/51c8e37cee245da6b40000bd">Strip Comments</a></div><h6>JavaScript:</h6><div><pre>function solution(input, markers) {
+  let splited = input.split('\n')
+  let size = splited.length
+  for ( let i = 0; i &lt; size; i++) {
+    let ch = splited[i].split('');
+    let cSize = ch.length
+    for ( let j = 0; j &lt; cSize; j++) {
+      if ( ch[j] === markers[0] || ch[j] === markers[1]) {
+        splited.splice(i, 1, splited[i].slice(0, j-1))
+      }
+    }
+  }
+  return splited.join('\n')
+}</pre></div><div><pre>function solution(input, markers) {
+  let splited = input.split('\n')
+  let size = splited.length
+  for ( let i = 0; i &lt; size; i++) {
+    let ch = splited[i].split('');
+    let cSize = ch.length
+    for ( let j = 0; j &lt; cSize; j++) {
+      if ( ch[j] === markers[0] || ch[j] === markers[1]) {
+        splited.splice(i, 1, splited[i].slice(0, j-1))
+      }
+      else if ( !splited[i].includes(markers[0])) {
+      }
+    }
+  }
+  return splited.join('\n')
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54de279df565808f8b00126a">Binary multiple of 3</a></div><h6>JavaScript:</h6><div><pre>// Regular expression that matches binary inputs that are multiple of 3
+const multipleOf3Regex = /^(0*(1(1|(01*0)+1))*)*$/;</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/554e4a2f232cdd87d9000038">Complementary DNA</a></div><h6>TypeScript:</h6><div><pre>export class Kata {
+  static dnaStrand(dna: string) {
+    const para = {
+      A: 'T',
+      T: 'A',
+      G: 'C',
+      C: 'G'
+    }
+    return dna.split("").reduce((p, c) =&gt; p + para[c as dna], "");
+  }
+}
+type dna = 'A' | 'T' | 'G' | 'C'</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54da5a58ea159efa38000836">Find the odd int</a></div><h6>JavaScript:</h6><div><pre>function findOdd(A) {
+  let res = {};
+  A.forEach(k =&gt; {
+    res[k] = res[k] ? res[k] + 1 : 1;
+  });
+  return +Object.keys(res)
+    .find(key =&gt; res[key] % 2 === 1);
+}</pre></div><h6>TypeScript:</h6><div><pre>export const findOdd = (xs: number[]): number =&gt; {
+  if(xs.length === 1) return xs[0]
+  const cNum:number[] = []
+  for(let mn=0; mn&lt;xs.length; mn++){
+    let el = xs[mn]
+    if(!cNum.includes(el)){
+      let c = 0
+      for(let i = mn; i&lt;xs.length; i++) if(xs[i] === el) c++
+      if (c &amp; 1) return el
+        else cNum.push(el)
+    }
+  }
+  return 0
+}
+</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/545cedaa9943f7fe7b000048">Detect Pangram</a></div><h6>TypeScript:</h6><div><pre>export const isPangram = (phrase: string): boolean =&gt;{
+  let unic = phrase.toLowerCase().match(/[a-z]/g)
+  return new Set(unic).size === 26
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55f8a9c06c018a0d6e000132">Regex validate PIN code</a></div><h6>TypeScript:</h6><div><pre>export class Kata {
+  static validatePin(pin: string): boolean {
+    if(!(pin.length===6 || pin.length===4)) return false
+    return pin.match(/[^0-9]/gi) ? false : true
+  }
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5259b20d6021e9e14c0010d4">Reverse words</a></div><h6>TypeScript:</h6><div><pre>export function reverseWords(str: string): string {
+  return str
+    .split(' ')
+    .map(hlp)
+    .join(' ');
+}
+const hlp = (s:string) =&gt; s.split('').reverse().join('')</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/56606694ec01347ce800001b">Is this a triangle?</a></div><h6>TypeScript:</h6><div><pre>export function isTriangle(a: number, b: number, c: number): boolean {
+  return (a+b&gt;c &amp;&amp; b+c&gt;a &amp;&amp; c+a&gt;b) ? true : false;
+}
+</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54da539698b8a2ad76000228">Take a Ten Minutes Walk</a></div><h6>TypeScript:</h6><div><pre>export function isValidWalk(walk: string[]) {
+  if(walk.length !== 10) return false
+  let x = 0;
+  let y = 0;
+  walk.map(str =&gt; ({x, y}=direct(str as s,x,y)) )
+  return (x===0 &amp;&amp; y===0)
+}
+function direct(s:s,x:number,y:number):xy{
+  const ob:ob = {
+    n:{x,y:y+1},
+    s:{x,y:y-1},
+    e:{x:x-1,y},
+    w:{x:x+1,y}
+  }
+  return ob[s]
+}
+type s = 'n' | 's' | 'e' | 'w'
+type xy = {
+  x:number
+  y:number
+}
+type ob = {
+  n:xy
+  s:xy
+  e:xy
+  w:xy
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/51e056fe544cf36c410000fb">Most frequently used words in a text</a></div><h6>JavaScript:</h6><div><pre>function topThreeWords(text) {
+  const myArr = []
+  let mdText = text.toLowerCase().split` `.map(l=&gt;{
+    if (l===`'`) return ''
+    return l.replace(/[^'a-z]/gi,'')
+  }).filter(e=&gt;e)
+  const par = mdText.reduce((a,x)=&gt;(a[x]=a[x]?a[x]+1:1,a),{})
+  for (let i in par) myArr.push([i,par[i]])
+
+  return myArr.sort((a,b)=&gt;b[1]-a[1]).slice(0,3).map(e=&gt;e[0])
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/563fbac924106b8bf7000046">Breadcrumb Generator</a></div><h6>JavaScript:</h6><div><pre>let exclude=["the","of","in","from","by","with","and", "or", "for", "to", "at", "a"];
+
+function replExclude(e) {
+  return e.length &gt; 30
+    ? e.split('-')
+        .filter(a=&gt;!~exclude.indexOf(a))
+        .map(a=&gt;a[0])
+        .join('')
+        .toUpperCase()
+    : e.replace(/-/g,' ');
+}
+
+function tagA(e,pt) {
+  pt = e=='home' ? '/' : '/' + pt.slice(1).join('/') + '/';
+  return '&lt;a href="' + pt + '"&gt;' + replExclude(e).toUpperCase() + '&lt;/a&gt;';
+}
+
+function span(e) {
+  return '&lt;span class="active"&gt;' + /[^\.]+/.exec(replExclude(e))[0].toUpperCase() + '&lt;/span&gt;';
+}
+
+function generateBC(url, separator) {
+
+  url = url.replace(/(https?:\/\/)?.*?\/?/,'')
+    .replace(/[#\?].*/,'')
+    .split('/').filter(a=&gt;a!='')
+    .slice(1);
+
+  if (url.length &amp;&amp; url[url.length-1].match('^index\..*')) url.pop();
+
+  url.unshift('home');
+
+  url = url.map(function(e,i) {
+    return i == url.length-1 ? span(e) : tagA(e,url.slice(0,i+1));
+  });
+
+  return url.join(separator);
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55911ef14065454c75000062">Multiplying numbers as strings</a></div><h6>JavaScript:</h6><div><pre>function multiply(a,b) {
+  let aa = Array.from(a.replace(/^0*/,'')).reverse();
+  let bb = Array.from(b.replace(/^0*/,'')).reverse();
+  let c = Array(aa.length + bb.length).fill(0);
+
+
+  function more(i,vl) {
+    for(vl += c[i]; vl &gt; 0; vl = ~~(vl/10) + c[++i])
+      c[i] = vl % 10;
+  }
+
+  aa.forEach((v1,i)=&gt;bb.forEach((v2,j)=&gt;more(i+j, v1*v2)));
+  return c.reverse().join('').replace(/^0*(?=\d)/,'');
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/526d84b98f428f14a60008da">Hamming Numbers</a></div><h6>JavaScript:</h6><div><pre>function hamming (n) {
+  var seq = [1];
+  var i2 = 0, i3 = 0, i5 = 0;
+  for (let i = 1; i &lt; n; i++) {
+    let x = Math.min(2 * seq[i2], 3 * seq[i3], 5 * seq[i5]);
+    seq.push(x);
+    if (2 * seq[i2] &lt;= x) i2++;
+    if (3 * seq[i3] &lt;= x) i3++;
+    if (5 * seq[i5] &lt;= x) i5++;
+  }
+  return seq[n-1];
+}
+
+</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/521c2db8ddc89b9b7a0000c1">Snail</a></div><h6>JavaScript:</h6><div><pre>const snail = array =&gt; {
+  let rs;
+  while (array.length) {
+    rs = (rs ? rs.concat(array.shift()) : array.shift());
+    for (var i = 0; i &lt; array.length; i++)
+      rs.push(array[i].pop());
+    rs = rs.concat((array.pop() || []).reverse());
+    for (var i = array.length - 1; i &gt;= 0; i--)
+      rs.push(array[i].shift());
+  }
+  return rs;
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52ec24228a515e620b0005ef">Explosive Sum</a></div><h6>JavaScript:</h6><div><pre>function sum(num){
+  let ps = new Array(num+1).fill(0)
+  ps[0] = 1
+  let cnt = 0
+  for (let i = 1; i &lt; num+1; i++) {
+    cnt = 0
+    for (let j = i; j &lt; num+1; j++) {
+      ps[j] += ps[cnt]
+      cnt++
+    }
+  }
+  return ps[num]
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5541f58a944b85ce6d00006a">Product of consecutive Fib numbers</a></div><h6>JavaScript:</h6><div><pre>function productFib(prod) {
+  let pr = [0, 1];
+  for (let i = 0; pr[i + 1] &lt; prod; i++) pr.push(pr[i] + pr[i + 1]);
+  for (let j = 0; j &lt; pr.length; j++) {
+    if (pr[j] * pr[j + 1] === prod) return [pr[j], pr[j + 1], true];
+    if (pr[j] * pr[j + 1] !== prod &amp;&amp; pr[j] * pr[j + 1] &gt; prod)
+      return [pr[j], pr[j + 1], false];
+  }
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54b72c16cd7f5154e9000457">Decode the Morse code, advanced</a></div><h6>JavaScript:</h6><div><pre>function unStr (str, fc) {
+  let pr = [];
+  str.split('').reduce((prev, cur)=&gt; {
+    if (prev === 0) {
+      pr.push(cur);
+      return fc - 1;
+    }
+    return prev - 1;
+  }, fc - 1)
+  return pr.join('');
+}
+
+function shLength (str) {
+  let par = str.split('').reduce((prev, cur) =&gt; {
+    if (cur === prev.char) {
+      prev.length = prev.length + 1;
+    } else {
+      if (prev.length &lt; prev.shLen) {
+        prev.shLen = prev.length;
+      }
+      prev.char = cur;
+      prev.length = 1;
+    }
+    return prev;
+  }, {
+    char: null,
+    length: Infinity,
+    shLen: Infinity
+  });
+  return (par.length &lt; par.shLen) ?  par.length : par.shLen;
+}
+
+function decodeBits (bits) {
+  bits = bits.substring(bits.indexOf('1'), bits.lastIndexOf('1') + 1);
+  bits = unStr(bits, shLength(bits));
+  return bits.replace(/0000000/g, '   ')
+    .replace(/000/g, ' ')
+    .replace(/111/g, '-')
+    .replace(/1/g, '.')
+    .replace(/0/g, '');
+}
+
+let decodeMorse = morseCode =&gt; {
+  return morseCode.trim().split('   ')
+    .map(s =&gt; s.split(' ')
+               .map(c =&gt; MORSE_CODE[c])
+               .join(''))
+    .join(' ');
+}</pre></div></div><div><div><div border="false"><div><span>4 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/525f4206b73515bffb000b21">Adding Big Numbers</a></div><h6>JavaScript:</h6><div><pre>function add(a, b) {
+  let res = '', c = 0;
+  let aa = a.split("");
+  let bb = b.split("");
+  while (aa.length || bb.length || c) {
+    c += ~~aa.pop() + ~~bb.pop();
+    res = (c % 10) + res;
+    c = c &gt; 9;
+  }
+  return res;
+}</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/513e08acc600c94f01000001">RGB To Hex Conversion</a></div><h6>JavaScript:</h6><div><pre>function rgb(r, g, b){
+  return to16(r) + to16(g) + to16(b);
+}
+
+function to16(r_g_b) {
+  if (r_g_b &lt;= 0) return "00";
+  if (r_g_b &gt; 255) return "FF";
+  let res = r_g_b.toString(16).toUpperCase();
+  return res.length===1 ? "0"+res : res
+
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5842df8ccbd22792a4000245">Write Number in Expanded Form</a></div><h6>JavaScript:</h6><div><pre>const expandedForm = num =&gt;
+  num
+    .toString()
+    .split('')
+    .reverse()
+    .map((a, i) =&gt; a * Math.pow(10, i))
+    .filter(a =&gt; a &gt; 0)
+    .reverse()
+    .join(' + ');</pre></div></div><div><div><div border="false"><div><span>5 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/53c235e4d5cd9c397200021d">Deep comparison of objects</a></div><h6>JavaScript:</h6><div><pre>const fl = s =&gt; Object.entries(s).map(item =&gt; item.join()).sort().join()
+function deepCompare(obj1, obj2) {
+  if (!obj1 || !obj2) return obj1 === obj2;
+  return fl(obj1) === fl(obj2);
+};</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/576757b1df89ecf5bd00073b">Build Tower</a></div><h6>JavaScript:</h6><div><pre>function towerBuilder(nFloors) {
+  return [...Array(nFloors)].map(
+    (_, i) =&gt;
+      " ".repeat(nFloors - 1 - i) + "*".repeat(i * 2 + 1) + " ".repeat(nFloors - 1 - i)
+  );
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5552101f47fc5178b1000050">Playing with digits</a></div><h6>JavaScript:</h6><div><pre>function digPow(n, p) {
+  let par =
+    n
+      .toString()
+      .split('')
+      .reduce((acc, cur, i, arr) =&gt; acc + Math.pow(Number(arr[i]), p + i), 0) / n;
+  return ('' + par).includes('.') ? -1 : par;
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54b724efac3d5402db00065e">Decode the Morse code </a></div><h6>JavaScript:</h6><div><pre>decodeMorse = function(morseCode) {
+  return morseCode
+    .split(' ')
+    .map((z, i) =&gt; (MORSE_CODE[z] != undefined ? MORSE_CODE[z] : 1))
+    .join('')
+    .replace(/11/g, ' ')
+    .replace(/1/g, ' ')
+    .trim();
+};</pre></div></div><div><div><div class="tag is-long is-inline mr-15px" border="false"><span>Retired</span></div><a target="_blank" href="https://www.codewars.com/kata/523a86aa4230ebb5420001e1">Where my anagrams at?</a></div><h6>JavaScript:</h6><div><pre>const sorter = s =&gt; s.split('').sort().join('')
+function anagrams(word, words) {
+  word = sorter(word)
+  return words.filter(v =&gt; word == sorter(v));
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5839edaa6754d6fec10000a2">Find the missing letter</a></div><h6>JavaScript:</h6><div><pre>function findMissingLetter(array) {
+  const lit = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
+  for(var i = 0; i &lt; array.length; i++) {
+    fIndx = lit.indexOf(array[i].toLowerCase())
+    if(array[0] === array[0].toUpperCase()) {
+      if(lit[fIndx + 1].toUpperCase() !== array[i + 1]) {
+        return lit[fIndx + 1].toUpperCase()
+      }
+    } else if(array[0] === array[0].toLowerCase()) {
+      if(lit[fIndx + 1] !== array[i + 1])
+        return lit[fIndx + 1].toLowerCase()
+    }
+  }
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/54ff3102c1bad923760001f3">Vowel Count</a></div><h6>JavaScript:</h6><div><pre>function getCount(str) {
+  return (str.match(/[aeiou]/ig)||[]).length;
+}</pre></div></div><div><div><div border="false"><div><span>6 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/523f5d21c841566fde000009">Array.diff</a></div><h6>JavaScript:</h6><div><pre>function arrayDiff(a, b) {
+  return [...a].filter(x =&gt; !b.includes(x))
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5467e4d82edf8bbf40000155">Descending Order</a></div><h6>JavaScript:</h6><div><pre>function descendingOrder(n){
+  return +(String(n)).split('').sort().reverse().join('')
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/52fba66badcd10859f00097e">Disemvowel Trolls</a></div><h6>JavaScript:</h6><div><pre>function disemvowel(str) {
+  return str.replace(/[aeuio]/gi,'');
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/56541980fa08ab47a0000040">Printer Errors</a></div><h6>JavaScript:</h6><div><pre>function printerError(s) {
+  return `${s.replace(/[a-m]/gi, "").length}/${s.length}`
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55fd2d567d94ac3bc9000064">Sum of odd numbers</a></div><h6>JavaScript:</h6><div><pre>function rowSumOddNumbers(n) {
+	return Math.pow(n, 3);
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/55b42574ff091733d900002f">Friend or Foe?</a></div><h6>JavaScript:</h6><div><pre>function friend(friends){
+  return friends.filter(num =&gt; num.length === 4)
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/53dbd5315a3c69eed20002dd">List Filtering</a></div><h6>JavaScript:</h6><div><pre>function filter_list(l) {
+  return l.filter(v =&gt; typeof v == "number")
+}</pre></div></div><div><div><div border="false"><div><span>7 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/5390bac347d09b7da40006f6">Jaden Casing Strings</a></div><h6>JavaScript:</h6><div><pre>String.prototype.toJadenCase = function () {
+    return this.split(' ').
+    map(w =&gt; w[0].toUpperCase() + w.slice(1)).join(' ');
+};</pre></div></div><div><div><div border="false"><div><span>8 kyu</span></div></div><a target="_blank" href="https://www.codewars.com/kata/50654ddff44f800200000004">Multiply</a></div><h6>JavaScript:</h6><div><pre>function multiply(a, b){
+  return a * b
+}
+</pre></div></div></div>
+
+<script>document.querySelectorAll('ul').forEach(ul => ul.remove());</script>
+</body></html>
